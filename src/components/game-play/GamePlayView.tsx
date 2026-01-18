@@ -14,11 +14,14 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuIcon from "@mui/icons-material/Menu";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import InstallMobileIcon from "@mui/icons-material/InstallMobile";
+import AppsIcon from "@mui/icons-material/Apps";
+import AdjustIcon from "@mui/icons-material/Adjust";
 import { useStores } from "../../hooks/useStores";
 import { PlayerScoreDisplay } from "./PlayerScoreDisplay";
 import { CurrentVisitDisplay } from "./CurrentVisitDisplay";
 import { CheckoutDisplay } from "./CheckoutDisplay";
 import { ButtonInput } from "../input/ButtonInput";
+import { DartboardInput } from "../dartboard";
 import { WinnerDialog } from "../dialogs/WinnerDialog";
 import type { Player } from "../../types";
 
@@ -82,6 +85,11 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
     uiStore.goToPlayerSetup();
   };
 
+  const handleToggleInput = (): void => {
+    handleMenuClose();
+    uiStore.toggleInputMethod();
+  };
+
   return (
     <Box
       sx={{
@@ -115,6 +123,18 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
           >
+            <MenuItem onClick={handleToggleInput}>
+              <ListItemIcon>
+                {uiStore.inputMethod === "buttons" ? (
+                  <AdjustIcon fontSize="small" />
+                ) : (
+                  <AppsIcon fontSize="small" />
+                )}
+              </ListItemIcon>
+              <ListItemText>
+                {uiStore.inputMethod === "buttons" ? "Use Dartboard" : "Use Buttons"}
+              </ListItemText>
+            </MenuItem>
             <MenuItem onClick={handleLeaveGame}>
               <ListItemIcon>
                 <ExitToAppIcon fontSize="small" />
@@ -134,7 +154,11 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
 
       {/* Input area - takes remaining space */}
       <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", p: 1, minHeight: 0 }}>
-        <ButtonInput onThrow={handleThrow} onUndo={handleUndo} />
+        {uiStore.inputMethod === "buttons" ? (
+          <ButtonInput onThrow={handleThrow} onUndo={handleUndo} />
+        ) : (
+          <DartboardInput onThrow={handleThrow} onUndo={handleUndo} />
+        )}
       </Box>
 
       {/* Winner dialog */}
