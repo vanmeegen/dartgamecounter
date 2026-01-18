@@ -148,22 +148,44 @@ interface SegmentLabelProps {
 function SegmentLabel({ segment, index, cx, cy }: SegmentLabelProps): JSX.Element {
   const anglePerSegment = 360 / 20;
   const angle = index * anglePerSegment;
-  const labelRadius = (92 / 100) * cx;
-  const pos = polarToCartesian(cx, cy, labelRadius, angle);
+
+  // Double label position (in double ring)
+  const doubleRadius = ((RADII.doubleouter + RADII.double) / 2 / 100) * cx;
+  const doublePos = polarToCartesian(cx, cy, doubleRadius, angle);
+
+  // Triple label position (in triple ring)
+  const tripleRadius = ((RADII.tripleOuter + RADII.triple) / 2 / 100) * cx;
+  const triplePos = polarToCartesian(cx, cy, tripleRadius, angle);
+
+  const fontSize = cx * 0.045;
 
   return (
-    <text
-      x={pos.x}
-      y={pos.y}
-      textAnchor="middle"
-      dominantBaseline="central"
-      fill="#fff"
-      fontSize={cx * 0.06}
-      fontWeight="bold"
-      style={{ pointerEvents: "none" }}
-    >
-      {segment}
-    </text>
+    <g style={{ pointerEvents: "none" }}>
+      {/* Double label */}
+      <text
+        x={doublePos.x}
+        y={doublePos.y}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill="#fff"
+        fontSize={fontSize}
+        fontWeight="bold"
+      >
+        D{segment}
+      </text>
+      {/* Triple label */}
+      <text
+        x={triplePos.x}
+        y={triplePos.y}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill="#fff"
+        fontSize={fontSize}
+        fontWeight="bold"
+      >
+        T{segment}
+      </text>
+    </g>
   );
 }
 
@@ -271,6 +293,32 @@ export function DartboardInput({ onThrow, onUndo }: DartboardInputProps): JSX.El
               cy={cy}
             />
           ))}
+
+          {/* Bull labels */}
+          <text
+            x={cx}
+            y={cy - scale(RADII.singleBull) / 2 - scale(RADII.bull) / 2}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#fff"
+            fontSize={cx * 0.045}
+            fontWeight="bold"
+            style={{ pointerEvents: "none" }}
+          >
+            25
+          </text>
+          <text
+            x={cx}
+            y={cy}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fill="#fff"
+            fontSize={cx * 0.04}
+            fontWeight="bold"
+            style={{ pointerEvents: "none" }}
+          >
+            Bull
+          </text>
         </svg>
       </Box>
     </Box>

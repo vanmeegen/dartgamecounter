@@ -106,8 +106,8 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
                 sx={{
                   flex: 1,
                   minWidth: 0,
-                  fontSize: { xs: "1rem", sm: "1.2rem" },
-                  fontWeight: 600,
+                  fontSize: { xs: "1.5rem", sm: "2rem" },
+                  fontWeight: 700,
                   py: 0,
                 }}
               >
@@ -125,8 +125,8 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
             sx={{
               flex: 1,
               minWidth: 0,
-              fontSize: { xs: "1rem", sm: "1.2rem" },
-              fontWeight: 600,
+              fontSize: { xs: "1.5rem", sm: "2rem" },
+              fontWeight: 700,
               py: 0,
               bgcolor: modifier >= 2 ? "secondary.dark" : undefined,
             }}
