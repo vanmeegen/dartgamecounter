@@ -20,19 +20,20 @@ export const CheckoutDisplay = observer(function CheckoutDisplay({
   return (
     <Box
       sx={{
-        py: 1,
-        px: 2,
+        py: 0.5,
+        px: 1.5,
         bgcolor: "success.dark",
         borderRadius: 1,
-        mx: 2,
-        mb: 1,
-        textAlign: "center",
+        ml: "auto",
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
       }}
     >
-      <Typography variant="body2" sx={{ opacity: 0.8, mb: 0.5 }}>
-        Checkout
+      <Typography variant="caption" sx={{ opacity: 0.8 }}>
+        OUT:
       </Typography>
-      <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: 1 }}>
+      <Typography variant="body2" sx={{ fontWeight: 700, letterSpacing: 0.5 }}>
         {suggestion.description}
       </Typography>
     </Box>

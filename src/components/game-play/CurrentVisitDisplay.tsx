@@ -24,63 +24,59 @@ export const CurrentVisitDisplay = observer(function CurrentVisitDisplay({
   });
 
   return (
-    <Box sx={{ px: 2, pb: 2 }}>
-      <Box
-        sx={{
-          display: "flex",
-          gap: 1,
-          justifyContent: "center",
-        }}
-      >
-        {slots.map((slot, index) => (
-          <Paper
-            key={index}
-            sx={{
-              width: 70,
-              height: 70,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              bgcolor: slot ? "background.paper" : "action.disabledBackground",
-              border: visit.busted && slot ? "2px solid" : "none",
-              borderColor: "error.main",
-            }}
-          >
-            {slot ? (
-              <>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    color: visit.busted ? "error.main" : "text.primary",
-                  }}
-                >
-                  {slot.display}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {slot.value}
-                </Typography>
-              </>
-            ) : (
-              <Typography color="text.disabled">—</Typography>
-            )}
-          </Paper>
-        ))}
-      </Box>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+      {slots.map((slot, index) => (
+        <Paper
+          key={index}
+          sx={{
+            width: { xs: 52, sm: 60 },
+            height: { xs: 44, sm: 50 },
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: slot ? "background.paper" : "action.disabledBackground",
+            border: visit.busted && slot ? "2px solid" : "none",
+            borderColor: "error.main",
+          }}
+        >
+          {slot ? (
+            <>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: { xs: "0.85rem", sm: "1rem" },
+                  lineHeight: 1.2,
+                  color: visit.busted ? "error.main" : "text.primary",
+                }}
+              >
+                {slot.display}
+              </Typography>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ fontSize: "0.65rem", lineHeight: 1 }}
+              >
+                {slot.value}
+              </Typography>
+            </>
+          ) : (
+            <Typography color="text.disabled">—</Typography>
+          )}
+        </Paper>
+      ))}
 
-      {/* Total and bust indicator */}
-      <Box sx={{ textAlign: "center", mt: 1 }}>
-        {visit.busted ? (
-          <Typography variant="h6" color="error.main" sx={{ fontWeight: 700 }}>
-            BUST!
-          </Typography>
-        ) : visit.total > 0 ? (
-          <Typography variant="body2" color="text.secondary">
-            Total: {visit.total}
-          </Typography>
-        ) : null}
-      </Box>
+      {/* Total or bust indicator */}
+      {visit.busted ? (
+        <Typography variant="body2" color="error.main" sx={{ fontWeight: 700, ml: 0.5 }}>
+          BUST
+        </Typography>
+      ) : visit.total > 0 ? (
+        <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+          ={visit.total}
+        </Typography>
+      ) : null}
     </Box>
   );
 });

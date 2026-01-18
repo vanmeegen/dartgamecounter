@@ -21,23 +21,24 @@ export const PlayerScoreDisplay = observer(function PlayerScoreDisplay({
   const otherPlayers = game.players.filter((p) => p.id !== currentPlayer.id);
 
   return (
-    <Box sx={{ px: 2, pb: 2 }}>
+    <Box sx={{ px: 1, pb: 1, pt: 0.5 }}>
       {/* Current player - large display */}
       <Paper
         sx={{
-          p: 2,
-          mb: 1,
+          py: 1,
+          px: 2,
+          mb: 0.5,
           textAlign: "center",
           bgcolor: "primary.dark",
         }}
       >
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="caption" color="text.secondary">
           {currentPlayer.name}
         </Typography>
         <Typography
-          variant="h1"
+          variant="h2"
           sx={{
-            fontSize: "4rem",
+            fontSize: { xs: "2.5rem", sm: "3rem" },
             fontWeight: 700,
             lineHeight: 1,
           }}
@@ -51,7 +52,7 @@ export const PlayerScoreDisplay = observer(function PlayerScoreDisplay({
         <Box
           sx={{
             display: "flex",
-            gap: 1,
+            gap: 0.5,
             flexWrap: "wrap",
           }}
         >
@@ -60,16 +61,22 @@ export const PlayerScoreDisplay = observer(function PlayerScoreDisplay({
               key={player.id}
               sx={{
                 flex: 1,
-                minWidth: 80,
-                p: 1,
+                minWidth: 70,
+                py: 0.5,
+                px: 1,
                 textAlign: "center",
                 bgcolor: "background.paper",
               }}
             >
-              <Typography variant="caption" color="text.secondary" noWrap>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                noWrap
+                sx={{ fontSize: "0.65rem" }}
+              >
                 {player.name}
               </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 600 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
                 {game.getPlayerScore(player.id)}
               </Typography>
             </Paper>

@@ -49,30 +49,30 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        height: "100vh",
+        height: "100dvh", // Dynamic viewport height for mobile
         display: "flex",
         flexDirection: "column",
         bgcolor: "background.default",
+        overflow: "hidden",
       }}
     >
-      {/* Header with menu */}
-      <Box sx={{ p: 1, display: "flex", justifyContent: "flex-end" }}>
-        <IconButton size="small">
-          <MenuIcon />
+      {/* Player scores with overlaid menu */}
+      <Box sx={{ flexShrink: 0, position: "relative" }}>
+        <IconButton size="small" sx={{ position: "absolute", top: 4, right: 4, zIndex: 1 }}>
+          <MenuIcon fontSize="small" />
         </IconButton>
+        <PlayerScoreDisplay game={game} />
       </Box>
 
-      {/* Player scores */}
-      <PlayerScoreDisplay game={game} />
+      {/* Current visit + Checkout in a row */}
+      <Box sx={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 1, px: 1, pb: 1 }}>
+        <CurrentVisitDisplay visit={game.state.currentVisit} />
+        <CheckoutDisplay suggestion={game.getCheckoutSuggestion()} />
+      </Box>
 
-      {/* Current visit */}
-      <CurrentVisitDisplay visit={game.state.currentVisit} />
-
-      {/* Checkout suggestion */}
-      <CheckoutDisplay suggestion={game.getCheckoutSuggestion()} />
-
-      {/* Input area */}
-      <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", p: 1 }}>
+      {/* Input area - takes remaining space */}
+      <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", p: 1, minHeight: 0 }}>
         <ButtonInput onThrow={handleThrow} onUndo={handleUndo} />
       </Box>
 

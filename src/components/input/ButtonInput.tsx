@@ -50,14 +50,15 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1, height: "100%" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, height: "100%" }}>
       {/* Modifier buttons */}
-      <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+      <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
         <Button
           variant={modifier === 1 ? "contained" : "outlined"}
           color={getModifierColor(1)}
           onClick={() => setModifier(1)}
-          sx={{ minWidth: 60 }}
+          size="small"
+          sx={{ minWidth: 50, py: 0.5 }}
         >
           S
         </Button>
@@ -65,7 +66,8 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
           variant={modifier === 2 ? "contained" : "outlined"}
           color={getModifierColor(2)}
           onClick={() => setModifier(2)}
-          sx={{ minWidth: 60 }}
+          size="small"
+          sx={{ minWidth: 50, py: 0.5 }}
         >
           D
         </Button>
@@ -73,15 +75,22 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
           variant={modifier === 3 ? "contained" : "outlined"}
           color={getModifierColor(3)}
           onClick={() => setModifier(3)}
-          sx={{ minWidth: 60 }}
+          size="small"
+          sx={{ minWidth: 50, py: 0.5 }}
         >
           T
         </Button>
-        <Button variant="outlined" color="error" onClick={handleMiss} sx={{ minWidth: 60 }}>
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={handleMiss}
+          size="small"
+          sx={{ minWidth: 50, py: 0.5 }}
+        >
           M
         </Button>
-        <IconButton onClick={onUndo} sx={{ ml: 1 }}>
-          <UndoIcon />
+        <IconButton onClick={onUndo} size="small">
+          <UndoIcon fontSize="small" />
         </IconButton>
       </Box>
 
@@ -97,8 +106,9 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
                 sx={{
                   flex: 1,
                   minWidth: 0,
-                  fontSize: "1.2rem",
+                  fontSize: { xs: "1rem", sm: "1.2rem" },
                   fontWeight: 600,
+                  py: 0,
                 }}
               >
                 {modifier === 1 ? num : modifier === 2 ? `D${num}` : `T${num}`}
@@ -115,8 +125,9 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
             sx={{
               flex: 1,
               minWidth: 0,
-              fontSize: "1.2rem",
+              fontSize: { xs: "1rem", sm: "1.2rem" },
               fontWeight: 600,
+              py: 0,
               bgcolor: modifier >= 2 ? "secondary.dark" : undefined,
             }}
           >
