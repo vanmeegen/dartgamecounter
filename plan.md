@@ -1,98 +1,88 @@
 # Dart Game Counter - Implementation Plan
 
-## Epics & Stories Overview
+## Current Status
 
-| Epic | Description  | Stories                                  |
-| ---- | ------------ | ---------------------------------------- |
-| E0   | Foundation   | Types, Stores, Theme, App Shell          |
-| E1   | Player Setup | S11, S12, S13 (S14-S16 optional)         |
-| E2   | Game Setup   | S21, S22 (S23 optional)                  |
-| E3   | Play X01     | S31, S33, S341, S342, S35, S36, S37, S38 |
-| E4   | Checkout     | E41                                      |
+### Completed
+
+- [x] **E0 - Foundation**: Types, stores, theme, app shell
+- [x] **E1 - Player Setup**: S11 (add/edit/remove), S12 (drag & drop), S13 (navigation)
+- [x] **E2 - Game Setup**: S21 (variant selection), S22 (start game)
+- [x] **E3 - Core Gameplay**: S33 (score display), S341 (button input), S35 (game loop), S36 (visit display), S37 (bust), S38 (winner)
+- [x] **E4 - Checkout**: E41 (checkout calculator & display)
+- [x] **E5 - Presets**: S14 (IndexedDB persistence), S15 (preset list), S23 (full game presets)
+- [x] **E6 - PWA**: manifest.json, service worker, iOS meta tags
+
+### Missing / Future
+
+- [ ] **S342 - SVG Dartboard**: Clickable dartboard with enlarged double/triple zones
+- [ ] **S16 - Multi-leg support**: Play multiple legs with player rotation
+- [ ] **S32 - Game-specific presets**: Different preset types per game mode
+- [ ] **S24 - Other game modes**: Cricket, Around the Clock, etc.
 
 ---
 
-## Increment 1: Foundation + E1 (Player Setup)
+## Epics & Stories Overview
 
-### E0 - Foundation (no user-facing features yet)
+| Epic | Description  | Status |
+| ---- | ------------ | ------ |
+| E0   | Foundation   | Done   |
+| E1   | Player Setup | Done   |
+| E2   | Game Setup   | Done   |
+| E3   | Play X01     | Done   |
+| E4   | Checkout     | Done   |
+| E5   | Presets      | Done   |
+| E6   | PWA          | Done   |
 
-| Task | Description                                 |
-| ---- | ------------------------------------------- |
-| E0.1 | Define TypeScript types (`src/types/`)      |
-| E0.2 | Create Game interface (`src/games/Game.ts`) |
-| E0.3 | Create RootStore with React context         |
-| E0.4 | Set up MUI theme provider                   |
-| E0.5 | Create app shell with view routing          |
+---
+
+## Completed Increments
+
+### E0 - Foundation
+
+- [x] TypeScript types (`src/types/`)
+- [x] Game interface (`src/games/Game.ts`)
+- [x] RootStore with React context
+- [x] MUI dark theme provider
+- [x] App shell with view routing
 
 ### E1 - Player Setup
 
-| Story | Description                          | Acceptance Criteria                          |
-| ----- | ------------------------------------ | -------------------------------------------- |
-| S11   | Setup players entering names         | Add/remove players, edit names, min 1 player |
-| S12   | Reorder player list with drag & drop | Drag handle, visual feedback, order persists |
-| S13   | Navigate to game setup               | "Next" button enabled when ≥1 player         |
+- [x] S11: Add/remove/edit players
+- [x] S12: Drag & drop reordering with @dnd-kit
+- [x] S13: Navigation to game config
 
-**Checkpoint**: User can add players, reorder them, and proceed to game setup.
+### E2 - Game Setup
 
----
+- [x] S21: Select game variant (301/501, single/double out)
+- [x] S22: Start game (creates X01Game instance)
 
-## Increment 2: E2 (Game Setup)
+### E3 - Core Gameplay
 
-| Story | Description         | Acceptance Criteria                             |
-| ----- | ------------------- | ----------------------------------------------- |
-| S21   | Select game variant | Choose 301/501, single/double out               |
-| S22   | Start game          | "Start Game" creates X01Game, navigates to play |
+- [x] S33: Player score display (current large, others small)
+- [x] S341: Button input (S/D/T/M modifiers, 1-20, 25, Bull)
+- [x] S35: Game loop (modifier applies, subtract score)
+- [x] S36: Visit display (3 darts with D/T/Bull prefixes)
+- [x] S37: Bust detection (revert score, next player)
+- [x] S38: Winner detection (dialog on checkout)
 
-**Checkpoint**: User can configure game and start playing.
+### E4 - Checkout Suggestions
 
----
+- [x] E41: Checkout calculator (common table + brute force)
+- [x] E41: CheckoutDisplay component (shows when score ≤ 170)
 
-## Increment 3: E3 (Core Gameplay)
+### E5 - Presets & Persistence
 
-| Story | Description          | Acceptance Criteria                                   |
-| ----- | -------------------- | ----------------------------------------------------- |
-| S31   | X01Game class        | Initialize 301/501, track scores per player           |
-| S33   | Player score display | Current player large, others small                    |
-| S341  | Button input         | Grid 1-20, 25, Bull + modifiers (2x, 3x, M)           |
-| S35   | Game loop            | Modifier applies to next throw, subtract score        |
-| S36   | Visit display        | Show 3 darts with D/T/Bull/M prefixes                 |
-| S37   | Bust detection       | Score < 0 or invalid double-out → revert, next player |
-| S38   | Finish detection     | Score = 0 → winner dialog with confetti               |
+- [x] S14: PresetStore with IndexedDB (idb library)
+- [x] S15: PresetList with one-click game start
+- [x] S23: Full game presets (players + config)
+- [x] SavePresetDialog for saving current setup
 
-**Checkpoint**: Full game playable with button input.
+### E6 - PWA
 
----
-
-## Increment 4: E3 (Dartboard Input)
-
-| Story | Description   | Acceptance Criteria                              |
-| ----- | ------------- | ------------------------------------------------ |
-| S342  | SVG dartboard | Clickable segments, enlarged double/triple zones |
-
-**Checkpoint**: Both input methods working.
-
----
-
-## Increment 5: E4 (Checkout Suggestions)
-
-| Story | Description         | Acceptance Criteria               |
-| ----- | ------------------- | --------------------------------- |
-| E41   | Checkout calculator | Show best finish when score ≤ 170 |
-
-**Checkpoint**: Checkout suggestions displayed during gameplay.
-
----
-
-## Increment 6: Optional Features (Later)
-
-| Story | Description                           |
-| ----- | ------------------------------------- |
-| S14   | Remember player setup in IndexedDB    |
-| S15   | Preset list with one-click game start |
-| S16   | Multi-leg rotation                    |
-| S23   | Full game presets                     |
-| S32   | Game-specific presets                 |
-| PWA   | manifest.json + service worker        |
+- [x] manifest.json with app metadata
+- [x] Service worker with cache-first strategy
+- [x] iOS/Safari PWA meta tags
+- [x] Build script copies PWA files to dist
 
 ---
 
@@ -102,30 +92,10 @@
 
 ```
 RootStore
-├── PlayerSetupStore    # E1: Player list management
-├── GameStore           # E2+E3: Unified game management
-│   └── currentGame     # Active game instance (X01Game)
-├── PresetStore         # Optional: Presets + persistence
-└── UIStore             # UI state (current view, input method)
-```
-
-### Game Interface (Extensible)
-
-```typescript
-interface Game {
-  readonly type: GameType;
-  readonly config: GameConfig;
-  readonly state: GameState;
-
-  recordThrow(dart: Dart): void;
-  undoLastThrow(): void;
-  isFinished(): boolean;
-  getWinner(): Player | null;
-}
-
-class X01Game implements Game {
-  // 301/501 logic, bust detection, checkout calc
-}
+├── PlayerSetupStore    # Player list management
+├── GameStore           # Game config + currentGame instance
+├── PresetStore         # IndexedDB persistence
+└── UIStore             # Current view, dialogs
 ```
 
 ### Folder Structure
@@ -134,38 +104,35 @@ class X01Game implements Game {
 src/
 ├── types/              # Type definitions
 ├── stores/             # MobX stores
-├── games/              # Game implementations (X01Game)
+├── games/              # X01Game implementation
 ├── components/
-│   ├── player-setup/   # E1 components
-│   ├── game-config/    # E2 components
-│   ├── game-play/      # E3 components
-│   ├── input/          # Button input
-│   ├── dartboard/      # SVG dartboard
-│   └── dialogs/        # Winner dialog
+│   ├── player-setup/   # PlayerSetupView, PlayerList, etc.
+│   ├── game-config/    # GameConfigView
+│   ├── game-play/      # GamePlayView, PlayerScoreDisplay, etc.
+│   ├── input/          # ButtonInput
+│   ├── presets/        # PresetList, SavePresetDialog
+│   └── dialogs/        # WinnerDialog
+├── utils/              # Checkout calculator
 ├── hooks/              # useStores
 └── theme/              # MUI theme
 ```
 
 ---
 
-## Workflow
+## Commits
 
-### Per Story
-
-1. Write failing tests (TDD)
-2. Implement to make tests pass
-3. `bun run build && bun test && bun run lint`
-4. Commit with descriptive message
-
-### Per Epic
-
-1. Complete all stories
-2. Verify build/test/lint pass
-3. **Wait for user validation**
-
----
-
-## Current Status
-
-- [x] Dependencies installed (MUI, @dnd-kit)
-- [ ] **Starting: Increment 1 (E0 + E1)**
+1. `45d8adc` - Initial commit
+2. `732222c` - Development tooling and React setup
+3. `1b014d5` - MUI and dnd-kit dependencies
+4. `50c2d4e` - E0: Foundation
+5. `ee70701` - S11: Player setup
+6. `3a9220e` - S12: Drag & drop
+7. `3fc9dde` - S13: Navigation
+8. `e27d9fd` - Fix: MobX reactivity
+9. `16b2cae` - UX: Auto-focus
+10. `c7119fa` - E2: Game Setup
+11. `6267070` - E3: Core Gameplay
+12. `4a05df8` - E4: Checkout calculator
+13. `9866cde` - E5: Presets & Persistence
+14. `a8309b3` - E6: PWA
+15. `1c45f74` - Fix: Preset loading, S/D/T modifiers
