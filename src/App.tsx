@@ -1,33 +1,40 @@
 import type { JSX } from "react";
-import { APITester } from "./APITester";
-import "./index.css";
+import { observer } from "mobx-react-lite";
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import Box from "@mui/material/Box";
+import { theme } from "./theme";
+import { StoreProvider, useUIStore } from "./hooks/useStores";
+import { PlayerSetupView } from "./components/player-setup/PlayerSetupView";
+import { GameConfigView } from "./components/game-config/GameConfigView";
+import { GamePlayView } from "./components/game-play/GamePlayView";
 
-import logo from "./logo.svg";
-import reactLogo from "./react.svg";
+const AppContent = observer(function AppContent(): JSX.Element {
+  const uiStore = useUIStore();
+
+  return (
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      {uiStore.currentView === "player-setup" && <PlayerSetupView />}
+      {uiStore.currentView === "game-config" && <GameConfigView />}
+      {uiStore.currentView === "game-play" && <GamePlayView />}
+    </Box>
+  );
+});
 
 export function App(): JSX.Element {
   return (
-    <div className="max-w-7xl mx-auto p-8 text-center relative z-10">
-      <div className="flex justify-center items-center gap-8 mb-8">
-        <img
-          src={logo}
-          alt="Bun Logo"
-          className="h-24 p-6 transition-all duration-300 hover:drop-shadow-[0_0_2em_#646cffaa] scale-120"
-        />
-        <img
-          src={reactLogo}
-          alt="React Logo"
-          className="h-24 p-6 transition-all duration-300 hover:drop-shadow-[0_0_2em_#61dafbaa] animate-[spin_20s_linear_infinite]"
-        />
-      </div>
-
-      <h1 className="text-5xl font-bold my-4 leading-tight">Bun + React</h1>
-      <p>
-        Edit <code className="bg-[#1a1a1a] px-2 py-1 rounded font-mono">src/App.tsx</code> and save
-        to test HMR
-      </p>
-      <APITester />
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <StoreProvider>
+        <AppContent />
+      </StoreProvider>
+    </ThemeProvider>
   );
 }
 
