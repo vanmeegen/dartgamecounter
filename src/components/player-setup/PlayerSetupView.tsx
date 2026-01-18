@@ -10,17 +10,21 @@ import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
+import IconButton from "@mui/material/IconButton";
 import InstallMobileIcon from "@mui/icons-material/InstallMobile";
+import PeopleIcon from "@mui/icons-material/People";
 import { usePlayerSetupStore, useUIStore } from "../../hooks/useStores";
 import { AddPlayerForm } from "./AddPlayerForm";
 import { PlayerList } from "./PlayerList";
 import { NextButton } from "./NextButton";
 import { PresetList } from "../presets/PresetList";
+import { ManagePlayersDialog } from "../dialogs/ManagePlayersDialog";
 
 export const PlayerSetupView = observer(function PlayerSetupView(): JSX.Element {
   const playerSetupStore = usePlayerSetupStore();
   const uiStore = useUIStore();
   const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
+  const [showManagePlayers, setShowManagePlayers] = useState(false);
 
   const handleAddPlayer = (name: string): void => {
     playerSetupStore.addPlayer(name);
@@ -70,9 +74,18 @@ export const PlayerSetupView = observer(function PlayerSetupView(): JSX.Element 
         </Alert>
       )}
 
-      <Typography variant="h4" component="h1" gutterBottom>
-        Players
-      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+        <Typography variant="h4" component="h1">
+          Players
+        </Typography>
+        <IconButton
+          onClick={() => setShowManagePlayers(true)}
+          title="Manage remembered players"
+          size="small"
+        >
+          <PeopleIcon />
+        </IconButton>
+      </Box>
 
       {/* Presets section */}
       <PresetList />
@@ -94,6 +107,9 @@ export const PlayerSetupView = observer(function PlayerSetupView(): JSX.Element 
       </Box>
 
       <NextButton disabled={!playerSetupStore.canProceed} onClick={handleNext} />
+
+      {/* Manage remembered players dialog */}
+      <ManagePlayersDialog open={showManagePlayers} onClose={() => setShowManagePlayers(false)} />
     </Container>
   );
 });

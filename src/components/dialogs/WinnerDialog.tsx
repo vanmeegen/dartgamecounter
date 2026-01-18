@@ -47,7 +47,7 @@ export function WinnerDialog({ open, winner, onClose }: WinnerDialogProps): JSX.
         </Typography>
       </DialogContent>
       <DialogActions sx={{ justifyContent: "center", pb: 3 }}>
-        <Button variant="contained" size="large" onClick={onClose}>
+        <Button variant="contained" size="large" onClick={onClose} autoFocus>
           New Game
         </Button>
       </DialogActions>

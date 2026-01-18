@@ -50,37 +50,46 @@ export function SavePresetDialog({ open, onClose }: SavePresetDialogProps): JSX.
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Save Preset</DialogTitle>
-      <DialogContent>
-        <TextField
-          autoFocus
-          margin="dense"
-          label="Preset Name"
-          fullWidth
-          variant="outlined"
-          value={presetName}
-          onChange={(e) => setPresetName(e.target.value)}
-          disabled={isSaving}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={includeGameConfig}
-              onChange={(e) => setIncludeGameConfig(e.target.checked)}
-              disabled={isSaving}
-            />
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (presetName.trim() && !isSaving) {
+            handleSave();
           }
-          label="Include game settings (variant, out rule)"
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} disabled={isSaving}>
-          Cancel
-        </Button>
-        <Button onClick={handleSave} variant="contained" disabled={!presetName.trim() || isSaving}>
-          Save
-        </Button>
-      </DialogActions>
+        }}
+      >
+        <DialogTitle>Save Preset</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Preset Name"
+            fullWidth
+            variant="outlined"
+            value={presetName}
+            onChange={(e) => setPresetName(e.target.value)}
+            disabled={isSaving}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={includeGameConfig}
+                onChange={(e) => setIncludeGameConfig(e.target.checked)}
+                disabled={isSaving}
+              />
+            }
+            label="Include game settings (variant, out rule)"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} disabled={isSaving}>
+            Cancel
+          </Button>
+          <Button type="submit" variant="contained" disabled={!presetName.trim() || isSaving}>
+            Save
+          </Button>
+        </DialogActions>
+      </form>
     </Dialog>
   );
 }

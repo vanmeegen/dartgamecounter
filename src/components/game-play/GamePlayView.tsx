@@ -2,12 +2,17 @@
  * GamePlayView - main view for game play (E3)
  */
 
-import type { JSX } from "react";
+import { useState, type JSX } from "react";
 import { observer } from "mobx-react-lite";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import IconButton from "@mui/material/IconButton";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
 import MenuIcon from "@mui/icons-material/Menu";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import InstallMobileIcon from "@mui/icons-material/InstallMobile";
 import { useStores } from "../../hooks/useStores";
 import { PlayerScoreDisplay } from "./PlayerScoreDisplay";
@@ -19,6 +24,7 @@ import { WinnerDialog } from "../dialogs/WinnerDialog";
 export const GamePlayView = observer(function GamePlayView(): JSX.Element {
   const { gameStore, uiStore } = useStores();
   const game = gameStore.currentGame;
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
   if (!game) {
     return (
@@ -47,6 +53,20 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
     uiStore.goToPlayerSetup();
   };
 
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>): void => {
+    setMenuAnchor(event.currentTarget);
+  };
+
+  const handleMenuClose = (): void => {
+    setMenuAnchor(null);
+  };
+
+  const handleLeaveGame = (): void => {
+    handleMenuClose();
+    gameStore.endGame();
+    uiStore.goToPlayerSetup();
+  };
+
   return (
     <Box
       sx={{
@@ -70,9 +90,23 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
               <InstallMobileIcon fontSize="small" />
             </IconButton>
           )}
-          <IconButton size="small">
+          <IconButton size="small" onClick={handleMenuOpen}>
             <MenuIcon fontSize="small" />
           </IconButton>
+          <Menu
+            anchorEl={menuAnchor}
+            open={Boolean(menuAnchor)}
+            onClose={handleMenuClose}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            <MenuItem onClick={handleLeaveGame}>
+              <ListItemIcon>
+                <ExitToAppIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Leave Game</ListItemText>
+            </MenuItem>
+          </Menu>
         </Box>
         <PlayerScoreDisplay game={game} />
       </Box>

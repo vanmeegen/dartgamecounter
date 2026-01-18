@@ -1,5 +1,5 @@
 /**
- * PresetStore - manages presets with IndexedDB persistence
+ * PresetStore - manages presets and remembered players with IndexedDB persistence
  */
 
 import { makeAutoObservable, runInAction } from "mobx";
@@ -7,11 +7,13 @@ import { openDB, type IDBPDatabase } from "idb";
 import type { PlayerPreset, GamePreset, Preset, X01Config } from "../types";
 
 const DB_NAME = "dartgamecounter";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const PRESET_STORE = "presets";
+const PLAYERS_STORE = "rememberedPlayers";
 
 export class PresetStore {
   presets: Preset[] = [];
+  rememberedPlayers: string[] = [];
   isLoading = true;
   private db: IDBPDatabase | null = null;
 
@@ -23,13 +25,18 @@ export class PresetStore {
   private async initDB(): Promise<void> {
     try {
       this.db = await openDB(DB_NAME, DB_VERSION, {
-        upgrade(db) {
+        upgrade(db, oldVersion) {
           if (!db.objectStoreNames.contains(PRESET_STORE)) {
             db.createObjectStore(PRESET_STORE, { keyPath: "id" });
           }
+          if (oldVersion < 2) {
+            if (!db.objectStoreNames.contains(PLAYERS_STORE)) {
+              db.createObjectStore(PLAYERS_STORE, { keyPath: "name" });
+            }
+          }
         },
       });
-      await this.loadPresets();
+      await this.loadData();
     } catch {
       console.error("Failed to initialize IndexedDB");
       runInAction(() => {
@@ -38,17 +45,21 @@ export class PresetStore {
     }
   }
 
-  private async loadPresets(): Promise<void> {
+  private async loadData(): Promise<void> {
     if (!this.db) return;
 
     try {
-      const presets = await this.db.getAll(PRESET_STORE);
+      const [presets, players] = await Promise.all([
+        this.db.getAll(PRESET_STORE),
+        this.db.getAll(PLAYERS_STORE),
+      ]);
       runInAction(() => {
         this.presets = presets;
+        this.rememberedPlayers = players.map((p: { name: string }) => p.name).sort();
         this.isLoading = false;
       });
     } catch {
-      console.error("Failed to load presets");
+      console.error("Failed to load data");
       runInAction(() => {
         this.isLoading = false;
       });
@@ -130,5 +141,72 @@ export class PresetStore {
   /** Get presets in random order (for S15 - one-click game start) */
   get randomizedPresets(): Preset[] {
     return [...this.presets].sort(() => Math.random() - 0.5);
+  }
+
+  // ========== Remembered Players ==========
+
+  /** Add a player name to remembered list (if not already present) */
+  async rememberPlayer(name: string): Promise<boolean> {
+    if (!this.db) return false;
+    const trimmedName = name.trim();
+    if (!trimmedName || this.rememberedPlayers.includes(trimmedName)) return false;
+
+    try {
+      await this.db.put(PLAYERS_STORE, { name: trimmedName });
+      runInAction(() => {
+        this.rememberedPlayers = [...this.rememberedPlayers, trimmedName].sort();
+      });
+      return true;
+    } catch {
+      console.error("Failed to remember player");
+      return false;
+    }
+  }
+
+  /** Add multiple player names at once */
+  async rememberPlayers(names: string[]): Promise<void> {
+    for (const name of names) {
+      await this.rememberPlayer(name);
+    }
+  }
+
+  /** Update a remembered player name */
+  async updateRememberedPlayer(oldName: string, newName: string): Promise<boolean> {
+    if (!this.db) return false;
+    const trimmedNew = newName.trim();
+    if (!trimmedNew || (trimmedNew !== oldName && this.rememberedPlayers.includes(trimmedNew))) {
+      return false;
+    }
+
+    try {
+      await this.db.delete(PLAYERS_STORE, oldName);
+      await this.db.put(PLAYERS_STORE, { name: trimmedNew });
+      runInAction(() => {
+        this.rememberedPlayers = this.rememberedPlayers
+          .filter((p) => p !== oldName)
+          .concat(trimmedNew)
+          .sort();
+      });
+      return true;
+    } catch {
+      console.error("Failed to update remembered player");
+      return false;
+    }
+  }
+
+  /** Remove a player from remembered list */
+  async forgetPlayer(name: string): Promise<boolean> {
+    if (!this.db) return false;
+
+    try {
+      await this.db.delete(PLAYERS_STORE, name);
+      runInAction(() => {
+        this.rememberedPlayers = this.rememberedPlayers.filter((p) => p !== name);
+      });
+      return true;
+    } catch {
+      console.error("Failed to forget player");
+      return false;
+    }
   }
 }
