@@ -151,6 +151,16 @@ for (const file of ["manifest.json", "logo.svg"]) {
   }
 }
 
+// Copy icons directory
+const iconsDir = path.join("src", "icons");
+const iconsOutDir = path.join(outdir, "icons");
+if (existsSync(iconsDir)) {
+  await mkdir(iconsOutDir, { recursive: true });
+  for (const file of await Array.fromAsync(new Bun.Glob("*.png").scan(iconsDir))) {
+    await copyFile(path.join(iconsDir, file), path.join(iconsOutDir, file));
+  }
+}
+
 // Copy sw.js with build timestamp for cache busting
 const swContent = await Bun.file(path.join("src", "sw.js")).text();
 const swWithVersion = `// Build: ${Date.now()}\n${swContent}`;
