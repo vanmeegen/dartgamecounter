@@ -4,28 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a React + TypeScript + Vite application with MobX for state management. It's set up with modern tooling including Vitest for testing, ESLint/Prettier for code quality, and Husky/lint-staged for pre-commit hooks.
+This is a React + TypeScript application with MobX for state management. It's set up with modern tooling including bun for build/run/test/bundle/package management, ESLint/Prettier for code quality, and Husky/lint-staged for pre-commit hooks.
 
-## Develobunent Commands
+## Development Commands
 
 ```bash
 # Start development server
-bun run dev
+bun dev
 
 # Build for production
 bun run build
+
+# serve a full-stack production build
+bun start
 
 # Run linting
 bun run lint
 
 # Run tests
 bun test                 # Run tests once
-bun run test:watch      # Run tests in watch mode
-bun run test:ui         # Run tests with UI
-bun run test:coverage   # Run tests with coverage report
 
-# Preview production build
-bun run preview
 ```
 
 ## Architecture
@@ -61,7 +59,7 @@ bun run preview
 
 ## Test Configuration
 
-Tests are configured in vite.config.ts:
+Tests are configured in bun:
 
 - Test files: `**/__tests__/**/*.spec.ts` and `**/__tests__/**/*.spec.tsx`
 
@@ -77,4 +75,4 @@ Automatically runs on commit:
 - Avoid disabling linter rules in your code files if possible
 - always use strict mode
 - DRY: avoid duplicate code lines, refactor common parts into shared functions
-- 
+-
