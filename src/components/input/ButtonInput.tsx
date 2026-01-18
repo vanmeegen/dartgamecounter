@@ -106,10 +106,11 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
                 sx={{
                   flex: 1,
                   minWidth: 0,
-                  fontSize: "min(8vw, 8vh)",
+                  fontSize: "clamp(1.5rem, 10vw, 7vh)",
                   fontWeight: 700,
                   p: 0,
                   lineHeight: 1,
+                  minHeight: 0,
                 }}
               >
                 {modifier === 1 ? num : modifier === 2 ? `D${num}` : `T${num}`}
@@ -126,10 +127,11 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
             sx={{
               flex: 1,
               minWidth: 0,
-              fontSize: "min(8vw, 8vh)",
+              fontSize: "clamp(1.5rem, 10vw, 7vh)",
               fontWeight: 700,
               p: 0,
               lineHeight: 1,
+              minHeight: 0,
               bgcolor: modifier >= 2 ? "secondary.dark" : undefined,
             }}
           >
