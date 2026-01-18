@@ -140,7 +140,7 @@ const result = await Bun.build({
 const end = performance.now();
 
 // Copy PWA static files to dist
-const staticFiles = ["manifest.json", "sw.js"];
+const staticFiles = ["manifest.json", "sw.js", "logo.svg"];
 await mkdir(outdir, { recursive: true });
 for (const file of staticFiles) {
   const srcPath = path.join("src", file);
