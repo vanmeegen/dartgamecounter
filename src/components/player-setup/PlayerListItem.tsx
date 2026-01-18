@@ -18,12 +18,12 @@ import type { Player } from "../../types";
 
 interface PlayerListItemProps {
   player: Player;
-  index: number;
   isEditing: boolean;
   onEdit: () => void;
   onCancelEdit: () => void;
   onUpdate: (newName: string) => void;
   onRemove: () => void;
+  dragHandleProps?: Record<string, unknown>;
 }
 
 export function PlayerListItem({
@@ -33,6 +33,7 @@ export function PlayerListItem({
   onCancelEdit,
   onUpdate,
   onRemove,
+  dragHandleProps,
 }: PlayerListItemProps): JSX.Element {
   const [editName, setEditName] = useState(player.name);
 
@@ -109,8 +110,8 @@ export function PlayerListItem({
         </Box>
       }
     >
-      <ListItemIcon sx={{ minWidth: 36 }}>
-        <DragIndicatorIcon sx={{ color: "text.disabled", cursor: "grab" }} />
+      <ListItemIcon sx={{ minWidth: 36, cursor: "grab", touchAction: "none" }} {...dragHandleProps}>
+        <DragIndicatorIcon sx={{ color: "text.disabled" }} />
       </ListItemIcon>
       <ListItemText primary={player.name} />
     </ListItem>
