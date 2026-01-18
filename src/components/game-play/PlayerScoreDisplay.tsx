@@ -7,6 +7,7 @@ import { observer } from "mobx-react-lite";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
+import Chip from "@mui/material/Chip";
 import type { X01Game } from "../../games";
 
 interface PlayerScoreDisplayProps {
@@ -18,10 +19,25 @@ export const PlayerScoreDisplay = observer(function PlayerScoreDisplay({
 }: PlayerScoreDisplayProps): JSX.Element {
   const currentPlayer = game.getCurrentPlayer();
   const currentScore = game.getPlayerScore(currentPlayer.id);
+  const currentLegsWon = game.getPlayerLegsWon(currentPlayer.id);
   const otherPlayers = game.players.filter((p) => p.id !== currentPlayer.id);
+  const showLegs = game.config.legs > 1;
+  const legsToWin = game.getLegsToWin();
 
   return (
     <Box sx={{ px: 1, pb: 1, pt: 0.5 }}>
+      {/* Leg indicator */}
+      {showLegs && (
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 0.5 }}>
+          <Chip
+            label={`Leg ${game.state.currentLeg} of ${game.config.legs} (first to ${legsToWin})`}
+            size="small"
+            variant="outlined"
+            sx={{ fontSize: "0.7rem" }}
+          />
+        </Box>
+      )}
+
       {/* Current player - large display */}
       <Paper
         sx={{
@@ -32,9 +48,19 @@ export const PlayerScoreDisplay = observer(function PlayerScoreDisplay({
           bgcolor: "primary.dark",
         }}
       >
-        <Typography variant="caption" color="text.secondary">
-          {currentPlayer.name}
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
+          <Typography variant="caption" color="text.secondary">
+            {currentPlayer.name}
+          </Typography>
+          {showLegs && (
+            <Chip
+              label={`${currentLegsWon} legs`}
+              size="small"
+              color="secondary"
+              sx={{ fontSize: "0.65rem", height: 18 }}
+            />
+          )}
+        </Box>
         <Typography
           variant="h2"
           sx={{
@@ -68,14 +94,23 @@ export const PlayerScoreDisplay = observer(function PlayerScoreDisplay({
                 bgcolor: "background.paper",
               }}
             >
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                noWrap
-                sx={{ fontSize: "0.65rem" }}
+              <Box
+                sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5 }}
               >
-                {player.name}
-              </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  noWrap
+                  sx={{ fontSize: "0.65rem" }}
+                >
+                  {player.name}
+                </Typography>
+                {showLegs && (
+                  <Typography variant="caption" color="secondary.main" sx={{ fontSize: "0.6rem" }}>
+                    ({game.getPlayerLegsWon(player.id)})
+                  </Typography>
+                )}
+              </Box>
               <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
                 {game.getPlayerScore(player.id)}
               </Typography>

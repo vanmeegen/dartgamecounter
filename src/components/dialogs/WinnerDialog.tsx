@@ -1,5 +1,5 @@
 /**
- * WinnerDialog - displays winner with celebration
+ * WinnerDialog - displays leg or match winner with celebration
  */
 
 import type { JSX } from "react";
@@ -11,23 +11,38 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import SportsIcon from "@mui/icons-material/Sports";
 import type { Player } from "../../types";
 
 interface WinnerDialogProps {
   open: boolean;
   winner: Player | null;
-  onClose: () => void;
+  isMatchWinner: boolean;
+  currentLeg?: number;
+  onNextLeg?: () => void;
+  onNewGame: () => void;
 }
 
-export function WinnerDialog({ open, winner, onClose }: WinnerDialogProps): JSX.Element {
+export function WinnerDialog({
+  open,
+  winner,
+  isMatchWinner,
+  currentLeg,
+  onNextLeg,
+  onNewGame,
+}: WinnerDialogProps): JSX.Element {
+  const Icon = isMatchWinner ? EmojiEventsIcon : SportsIcon;
+  const title = isMatchWinner ? "Match Winner!" : `Leg ${currentLeg} Winner!`;
+  const subtitle = isMatchWinner ? "Congratulations on winning the match!" : "Great checkout!";
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+    <Dialog open={open} onClose={isMatchWinner ? onNewGame : onNextLeg} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ textAlign: "center", pb: 0 }}>
-        <EmojiEventsIcon sx={{ fontSize: 60, color: "secondary.main" }} />
+        <Icon sx={{ fontSize: 60, color: "secondary.main" }} />
       </DialogTitle>
       <DialogContent sx={{ textAlign: "center" }}>
         <Typography variant="h4" gutterBottom>
-          Winner!
+          {title}
         </Typography>
         <Box
           sx={{
@@ -43,13 +58,24 @@ export function WinnerDialog({ open, winner, onClose }: WinnerDialogProps): JSX.
           </Typography>
         </Box>
         <Typography variant="body1" color="text.secondary">
-          Congratulations on the checkout!
+          {subtitle}
         </Typography>
       </DialogContent>
-      <DialogActions sx={{ justifyContent: "center", pb: 3 }}>
-        <Button variant="contained" size="large" onClick={onClose} autoFocus>
-          New Game
-        </Button>
+      <DialogActions sx={{ justifyContent: "center", pb: 3, gap: 1 }}>
+        {isMatchWinner ? (
+          <Button variant="contained" size="large" onClick={onNewGame} autoFocus>
+            New Game
+          </Button>
+        ) : (
+          <>
+            <Button variant="outlined" size="large" onClick={onNewGame}>
+              End Match
+            </Button>
+            <Button variant="contained" size="large" onClick={onNextLeg} autoFocus>
+              Next Leg
+            </Button>
+          </>
+        )}
       </DialogActions>
     </Dialog>
   );

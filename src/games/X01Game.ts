@@ -31,14 +31,58 @@ export class X01Game implements Game {
       currentPlayerIndex: 0,
       currentVisit: { darts: [], total: 0, busted: false },
       currentLeg: 1,
+      legStartingPlayerIndex: 0,
       visitHistory: [],
       finished: false,
+      legFinished: false,
       winnerId: null,
     };
   }
 
+  /**
+   * Get the number of legs a player needs to win the match.
+   * Best of N means first to (N/2 + 1) for even N, or (N+1)/2 for odd N.
+   */
+  getLegsToWin(): number {
+    return Math.floor(this.config.legs / 2) + 1;
+  }
+
+  /**
+   * Check if the current leg is finished (but match may continue).
+   */
+  isLegFinished(): boolean {
+    return this.state.legFinished;
+  }
+
+  /**
+   * Start the next leg after a leg is won.
+   * Rotates player order so next player starts.
+   */
+  nextLeg(): void {
+    if (!this.state.legFinished || this.state.finished) return;
+
+    // Increment leg counter
+    this.state.currentLeg += 1;
+
+    // Rotate starting player for the new leg
+    this.state.legStartingPlayerIndex =
+      (this.state.legStartingPlayerIndex + 1) % this.players.length;
+    this.state.currentPlayerIndex = this.state.legStartingPlayerIndex;
+
+    // Reset scores for all players
+    for (const playerScore of this.state.players) {
+      playerScore.score = this.config.variant;
+    }
+
+    // Reset visit state
+    this.state.currentVisit = { darts: [], total: 0, busted: false };
+    this.state.visitHistory = [];
+    this.state.legFinished = false;
+  }
+
   recordThrow(dart: Dart): void {
     if (this.state.finished) return;
+    if (this.state.legFinished) return; // Wait for nextLeg() call
     if (this.state.currentVisit.darts.length >= 3) return;
 
     const currentPlayerScore = this.getCurrentPlayerScore();
@@ -57,10 +101,17 @@ export class X01Game implements Game {
       return;
     }
 
-    // Check for checkout
+    // Check for checkout (leg won)
     if (newScore === 0) {
-      this.state.finished = true;
-      this.state.winnerId = currentPlayerScore.playerId;
+      currentPlayerScore.legsWon += 1;
+      this.state.legFinished = true;
+
+      // Check if match is won
+      if (currentPlayerScore.legsWon >= this.getLegsToWin()) {
+        this.state.finished = true;
+        this.state.winnerId = currentPlayerScore.playerId;
+      }
+
       this.endVisit(false);
       return;
     }
@@ -194,6 +245,11 @@ export class X01Game implements Game {
   getPlayerScore(playerId: string): number {
     const playerScore = this.state.players.find((ps) => ps.playerId === playerId);
     return playerScore?.score ?? 0;
+  }
+
+  getPlayerLegsWon(playerId: string): number {
+    const playerScore = this.state.players.find((ps) => ps.playerId === playerId);
+    return playerScore?.legsWon ?? 0;
   }
 
   private getCurrentPlayerScore(): PlayerScore {

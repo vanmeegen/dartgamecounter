@@ -52,6 +52,10 @@ export class GameStore {
     return this.currentGame?.undoLastThrow() ?? false;
   }
 
+  nextLeg(): void {
+    this.currentGame?.nextLeg();
+  }
+
   get isGameActive(): boolean {
     return this.currentGame !== null && !this.currentGame.isFinished();
   }

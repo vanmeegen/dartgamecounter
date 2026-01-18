@@ -211,4 +211,100 @@ describe("X01Game", () => {
       expect(suggestion).not.toBeNull();
     });
   });
+
+  describe("multi-leg games", () => {
+    const configBestOf3: X01Config = {
+      variant: 301,
+      outRule: "single",
+      legs: 3,
+    };
+
+    test("initializes with correct legs config", () => {
+      const game = new X01Game(players, configBestOf3);
+      expect(game.config.legs).toBe(3);
+      expect(game.state.currentLeg).toBe(1);
+      expect(game.state.players[0].legsWon).toBe(0);
+      expect(game.state.players[1].legsWon).toBe(0);
+    });
+
+    test("winning a leg increments legsWon", () => {
+      const game = new X01Game(players, configBestOf3);
+      game.state.players[0].score = 20;
+      game.recordThrow({ segment: 20, multiplier: 1 }); // Player 1 finishes
+      expect(game.state.players[0].legsWon).toBe(1);
+    });
+
+    test("winning a leg does not finish match if more legs needed", () => {
+      const game = new X01Game(players, configBestOf3);
+      game.state.players[0].score = 20;
+      game.recordThrow({ segment: 20, multiplier: 1 }); // Player 1 wins leg 1
+      expect(game.isFinished()).toBe(false);
+      expect(game.isLegFinished()).toBe(true);
+      expect(game.state.currentLeg).toBe(1); // Still on leg 1 until nextLeg() called
+    });
+
+    test("isMatchFinished returns true when player wins enough legs", () => {
+      const game = new X01Game(players, configBestOf3);
+      // Player 1 wins 2 legs (best of 3 = first to 2)
+      game.state.players[0].legsWon = 1;
+      game.state.players[0].score = 20;
+      game.recordThrow({ segment: 20, multiplier: 1 }); // Player 1 wins leg 2
+      expect(game.isFinished()).toBe(true);
+      expect(game.getWinner()?.id).toBe("p1");
+    });
+
+    test("nextLeg resets scores and increments leg counter", () => {
+      const game = new X01Game(players, configBestOf3);
+      game.state.players[0].score = 20;
+      game.recordThrow({ segment: 20, multiplier: 1 }); // Player 1 wins leg 1
+      game.nextLeg();
+      expect(game.state.currentLeg).toBe(2);
+      expect(game.state.players[0].score).toBe(301);
+      expect(game.state.players[1].score).toBe(301);
+      expect(game.state.currentVisit.darts).toEqual([]);
+    });
+
+    test("nextLeg rotates player order", () => {
+      const game = new X01Game(players, configBestOf3);
+      expect(game.getCurrentPlayer().id).toBe("p1"); // Leg 1 starts with p1
+      game.state.players[0].score = 20;
+      game.recordThrow({ segment: 20, multiplier: 1 }); // Player 1 wins leg 1
+      game.nextLeg();
+      expect(game.getCurrentPlayer().id).toBe("p2"); // Leg 2 starts with p2
+    });
+
+    test("player rotation continues correctly through multiple legs", () => {
+      const game = new X01Game(players, { ...configBestOf3, legs: 5 });
+      // Leg 1: p1 starts
+      expect(game.getCurrentPlayer().id).toBe("p1");
+      game.state.players[0].score = 20;
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      game.nextLeg();
+      // Leg 2: p2 starts
+      expect(game.getCurrentPlayer().id).toBe("p2");
+      game.state.players[1].score = 20;
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      game.nextLeg();
+      // Leg 3: p1 starts again
+      expect(game.getCurrentPlayer().id).toBe("p1");
+    });
+
+    test("getLegsToWin calculates correctly for odd legs", () => {
+      const game = new X01Game(players, configBestOf3);
+      expect(game.getLegsToWin()).toBe(2); // Best of 3 = first to 2
+    });
+
+    test("getLegsToWin calculates correctly for even legs", () => {
+      const game = new X01Game(players, { ...configBestOf3, legs: 4 });
+      expect(game.getLegsToWin()).toBe(3); // Best of 4 = first to 3
+    });
+
+    test("single leg game finishes after one leg win", () => {
+      const game = new X01Game(players, config301Single);
+      game.state.players[0].score = 20;
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      expect(game.isFinished()).toBe(true);
+      expect(game.isLegFinished()).toBe(true);
+    });
+  });
 });

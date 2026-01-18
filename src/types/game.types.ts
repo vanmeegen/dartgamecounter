@@ -20,9 +20,14 @@ export interface X01State {
   currentPlayerIndex: number;
   currentVisit: Visit;
   currentLeg: number;
+  /** Index of the player who started the current leg (for rotation) */
+  legStartingPlayerIndex: number;
   /** History of all visits for undo functionality */
   visitHistory: { playerId: string; visit: Visit; scoreAfter: number }[];
+  /** Match is finished (someone won enough legs) */
   finished: boolean;
+  /** Current leg is finished (waiting for nextLeg call) */
+  legFinished: boolean;
   winnerId: string | null;
 }
 

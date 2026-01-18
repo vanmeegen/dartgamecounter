@@ -20,6 +20,7 @@ import { CurrentVisitDisplay } from "./CurrentVisitDisplay";
 import { CheckoutDisplay } from "./CheckoutDisplay";
 import { ButtonInput } from "../input/ButtonInput";
 import { WinnerDialog } from "../dialogs/WinnerDialog";
+import type { Player } from "../../types";
 
 export const GamePlayView = observer(function GamePlayView(): JSX.Element {
   const { gameStore, uiStore } = useStores();
@@ -37,8 +38,8 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
   const handleThrow = (segment: number, multiplier: 1 | 2 | 3): void => {
     game.recordThrow({ segment, multiplier });
 
-    // Check for winner
-    if (game.isFinished()) {
+    // Check for leg or match finish
+    if (game.isLegFinished()) {
       uiStore.openWinnerDialog();
     }
   };
@@ -47,10 +48,24 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
     game.undoLastThrow();
   };
 
-  const handleWinnerDialogClose = (): void => {
+  const handleNextLeg = (): void => {
+    uiStore.closeWinnerDialog();
+    gameStore.nextLeg();
+  };
+
+  const handleNewGame = (): void => {
     uiStore.closeWinnerDialog();
     gameStore.endGame();
     uiStore.goToPlayerSetup();
+  };
+
+  // Find the leg winner (player whose score is 0)
+  const getLegWinner = (): Player | null => {
+    const winningPlayer = game.state.players.find((ps) => ps.score === 0);
+    if (winningPlayer) {
+      return game.players.find((p) => p.id === winningPlayer.playerId) ?? null;
+    }
+    return null;
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>): void => {
@@ -125,8 +140,11 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
       {/* Winner dialog */}
       <WinnerDialog
         open={uiStore.showWinnerDialog}
-        winner={game.getWinner()}
-        onClose={handleWinnerDialogClose}
+        winner={game.isFinished() ? game.getWinner() : getLegWinner()}
+        isMatchWinner={game.isFinished()}
+        currentLeg={game.state.currentLeg}
+        onNextLeg={handleNextLeg}
+        onNewGame={handleNewGame}
       />
     </Box>
   );
