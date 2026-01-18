@@ -140,15 +140,21 @@ const result = await Bun.build({
 const end = performance.now();
 
 // Copy PWA static files to dist
-const staticFiles = ["manifest.json", "sw.js", "logo.svg"];
 await mkdir(outdir, { recursive: true });
-for (const file of staticFiles) {
+
+// Copy manifest and logo
+for (const file of ["manifest.json", "logo.svg"]) {
   const srcPath = path.join("src", file);
   const destPath = path.join(outdir, file);
   if (existsSync(srcPath)) {
     await copyFile(srcPath, destPath);
   }
 }
+
+// Copy sw.js with build timestamp for cache busting
+const swContent = await Bun.file(path.join("src", "sw.js")).text();
+const swWithVersion = `// Build: ${Date.now()}\n${swContent}`;
+await Bun.write(path.join(outdir, "sw.js"), swWithVersion);
 
 const outputTable = result.outputs.map((output) => ({
   File: path.relative(process.cwd(), output.path),
