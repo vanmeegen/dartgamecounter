@@ -11,6 +11,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { useStores } from "../../hooks/useStores";
 import { PlayerScoreDisplay } from "./PlayerScoreDisplay";
 import { CurrentVisitDisplay } from "./CurrentVisitDisplay";
+import { CheckoutDisplay } from "./CheckoutDisplay";
 import { ButtonInput } from "../input/ButtonInput";
 import { WinnerDialog } from "../dialogs/WinnerDialog";
 
@@ -66,6 +67,9 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
 
       {/* Current visit */}
       <CurrentVisitDisplay visit={game.state.currentVisit} />
+
+      {/* Checkout suggestion */}
+      <CheckoutDisplay suggestion={game.getCheckoutSuggestion()} />
 
       {/* Input area */}
       <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", p: 1 }}>

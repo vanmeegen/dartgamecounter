@@ -159,4 +159,56 @@ describe("X01Game", () => {
       expect(game.undoLastThrow()).toBe(true);
     });
   });
+
+  describe("getCheckoutSuggestion", () => {
+    test("returns checkout for double out when score is checkable", () => {
+      const game = new X01Game(players, config501Double);
+      game.state.players[0].score = 40;
+      const suggestion = game.getCheckoutSuggestion();
+      expect(suggestion).not.toBeNull();
+      expect(suggestion?.description).toBe("D20");
+    });
+
+    test("returns null when score is too high", () => {
+      const game = new X01Game(players, config501Double);
+      const suggestion = game.getCheckoutSuggestion();
+      expect(suggestion).toBeNull(); // 501 > 170
+    });
+
+    test("returns checkout for 170 (max checkout)", () => {
+      const game = new X01Game(players, config501Double);
+      game.state.players[0].score = 170;
+      const suggestion = game.getCheckoutSuggestion();
+      expect(suggestion).not.toBeNull();
+      expect(suggestion?.description).toBe("T20 T20 Bull");
+    });
+
+    test("returns null when no darts remaining", () => {
+      const game = new X01Game(players, config501Double);
+      game.state.players[0].score = 40;
+      game.state.currentVisit.darts = [
+        { segment: 20, multiplier: 1 },
+        { segment: 20, multiplier: 1 },
+        { segment: 20, multiplier: 1 },
+      ];
+      const suggestion = game.getCheckoutSuggestion();
+      expect(suggestion).toBeNull();
+    });
+
+    test("respects darts remaining for checkout calculation", () => {
+      const game = new X01Game(players, config501Double);
+      game.state.players[0].score = 170;
+      // After 1 dart, only 2 remaining - can't finish 170
+      game.state.currentVisit.darts = [{ segment: 5, multiplier: 1 }];
+      const suggestion = game.getCheckoutSuggestion();
+      expect(suggestion).toBeNull();
+    });
+
+    test("returns checkout for single out", () => {
+      const game = new X01Game(players, config301Single);
+      game.state.players[0].score = 20;
+      const suggestion = game.getCheckoutSuggestion();
+      expect(suggestion).not.toBeNull();
+    });
+  });
 });

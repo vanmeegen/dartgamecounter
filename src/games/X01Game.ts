@@ -6,6 +6,7 @@ import { makeAutoObservable } from "mobx";
 import type { Game } from "./Game";
 import type { Dart, Player, PlayerScore, X01Config, X01State, CheckoutSuggestion } from "../types";
 import { getDartValue, isDouble } from "../types/dart.types";
+import { getCheckoutSuggestion } from "../utils/checkout";
 
 export class X01Game implements Game {
   readonly type = "x01" as const;
@@ -209,8 +210,7 @@ export class X01Game implements Game {
 
     if (score > 170 || dartsRemaining === 0) return null;
 
-    // TODO: Implement checkout calculator in E4
-    return null;
+    return getCheckoutSuggestion(score, dartsRemaining, this.config.outRule);
   }
 
   /**
