@@ -1,4 +1,4 @@
-import type { JSX } from "react";
+import { useEffect, type JSX } from "react";
 import { observer } from "mobx-react-lite";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -11,6 +11,10 @@ import { GamePlayView } from "./components/game-play/GamePlayView";
 
 const AppContent = observer(function AppContent(): JSX.Element {
   const uiStore = useUIStore();
+
+  useEffect(() => {
+    uiStore.setupInstallPrompt();
+  }, [uiStore]);
 
   return (
     <Box

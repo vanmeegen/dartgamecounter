@@ -1,17 +1,73 @@
 /**
- * UIStore - manages UI state (current view, input method, dialogs)
+ * UIStore - manages UI state (current view, input method, dialogs, PWA install)
  */
 
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import type { AppView, InputMethod } from "../types";
+
+// Type for the beforeinstallprompt event
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
 
 export class UIStore {
   currentView: AppView = "player-setup";
   inputMethod: InputMethod = "buttons";
   showWinnerDialog = false;
 
+  // PWA install prompt
+  private installPromptEvent: BeforeInstallPromptEvent | null = null;
+  canInstall = false;
+  isInstalled = false;
+
   constructor() {
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      setupInstallPrompt: false,
+    });
+    this.checkIfInstalled();
+  }
+
+  private checkIfInstalled(): void {
+    // Check if running in standalone mode (installed PWA)
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    this.isInstalled = isStandalone;
+  }
+
+  setupInstallPrompt(): void {
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      runInAction(() => {
+        this.installPromptEvent = e as BeforeInstallPromptEvent;
+        this.canInstall = true;
+      });
+    });
+
+    window.addEventListener("appinstalled", () => {
+      runInAction(() => {
+        this.canInstall = false;
+        this.isInstalled = true;
+        this.installPromptEvent = null;
+      });
+    });
+  }
+
+  async promptInstall(): Promise<boolean> {
+    if (!this.installPromptEvent) return false;
+
+    await this.installPromptEvent.prompt();
+    const { outcome } = await this.installPromptEvent.userChoice;
+
+    runInAction(() => {
+      if (outcome === "accepted") {
+        this.canInstall = false;
+        this.installPromptEvent = null;
+      }
+    });
+
+    return outcome === "accepted";
   }
 
   setView(view: AppView): void {

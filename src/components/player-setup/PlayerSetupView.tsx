@@ -8,6 +8,9 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
+import Button from "@mui/material/Button";
+import Alert from "@mui/material/Alert";
+import InstallMobileIcon from "@mui/icons-material/InstallMobile";
 import { usePlayerSetupStore, useUIStore } from "../../hooks/useStores";
 import { AddPlayerForm } from "./AddPlayerForm";
 import { PlayerList } from "./PlayerList";
@@ -47,6 +50,26 @@ export const PlayerSetupView = observer(function PlayerSetupView(): JSX.Element 
 
   return (
     <Container maxWidth="sm" sx={{ py: 3 }}>
+      {/* PWA Install Banner */}
+      {uiStore.canInstall && (
+        <Alert
+          severity="info"
+          sx={{ mb: 2 }}
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              startIcon={<InstallMobileIcon />}
+              onClick={() => uiStore.promptInstall()}
+            >
+              Install
+            </Button>
+          }
+        >
+          Install this app for offline use
+        </Alert>
+      )}
+
       <Typography variant="h4" component="h1" gutterBottom>
         Players
       </Typography>

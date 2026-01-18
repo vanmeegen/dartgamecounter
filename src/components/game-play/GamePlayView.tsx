@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
+import InstallMobileIcon from "@mui/icons-material/InstallMobile";
 import { useStores } from "../../hooks/useStores";
 import { PlayerScoreDisplay } from "./PlayerScoreDisplay";
 import { CurrentVisitDisplay } from "./CurrentVisitDisplay";
@@ -57,11 +58,22 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
         overflow: "hidden",
       }}
     >
-      {/* Player scores with overlaid menu */}
+      {/* Player scores with overlaid menu/install */}
       <Box sx={{ flexShrink: 0, position: "relative" }}>
-        <IconButton size="small" sx={{ position: "absolute", top: 4, right: 4, zIndex: 1 }}>
-          <MenuIcon fontSize="small" />
-        </IconButton>
+        <Box sx={{ position: "absolute", top: 4, right: 4, zIndex: 1, display: "flex", gap: 0.5 }}>
+          {uiStore.canInstall && (
+            <IconButton
+              size="small"
+              onClick={() => uiStore.promptInstall()}
+              sx={{ color: "primary.main" }}
+            >
+              <InstallMobileIcon fontSize="small" />
+            </IconButton>
+          )}
+          <IconButton size="small">
+            <MenuIcon fontSize="small" />
+          </IconButton>
+        </Box>
         <PlayerScoreDisplay game={game} />
       </Box>
 
