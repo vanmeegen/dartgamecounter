@@ -9,7 +9,7 @@ The following clarifications were made during planning:
 
 - **UI Framework**: MUI (Material UI) for components
 - **Dartboard Input**: SVG-based implementation with enlarged touch targets for double/triple rings
-- **Legs Configuration**: Best of N series (first player to win X legs wins the match)
+- **Legs Configuration**: First to N series (first player to win X legs wins the match)
 - **Out Rules**: Single out = any number finishes, Double out = last dart must be a double
 - **Max Checkout**: 170 points (mathematically correct: T20 + T20 + Bull)
 - **PWA Scope**: Basic manifest + install prompt for initial release

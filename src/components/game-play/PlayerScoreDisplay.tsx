@@ -30,7 +30,7 @@ export const PlayerScoreDisplay = observer(function PlayerScoreDisplay({
       {showLegs && (
         <Box sx={{ display: "flex", justifyContent: "center", mb: 0.5 }}>
           <Chip
-            label={`Leg ${game.state.currentLeg} of ${game.config.legs} (first to ${legsToWin})`}
+            label={`Leg ${game.state.currentLeg} - First to ${legsToWin}`}
             size="small"
             variant="outlined"
             sx={{ fontSize: "0.7rem" }}

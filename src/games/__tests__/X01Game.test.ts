@@ -245,10 +245,10 @@ describe("X01Game", () => {
 
     test("isMatchFinished returns true when player wins enough legs", () => {
       const game = new X01Game(players, configBestOf3);
-      // Player 1 wins 2 legs (best of 3 = first to 2)
-      game.state.players[0].legsWon = 1;
+      // Player 1 wins 3 legs (first to 3)
+      game.state.players[0].legsWon = 2;
       game.state.players[0].score = 20;
-      game.recordThrow({ segment: 20, multiplier: 1 }); // Player 1 wins leg 2
+      game.recordThrow({ segment: 20, multiplier: 1 }); // Player 1 wins leg 3
       expect(game.isFinished()).toBe(true);
       expect(game.getWinner()?.id).toBe("p1");
     });
@@ -289,14 +289,14 @@ describe("X01Game", () => {
       expect(game.getCurrentPlayer().id).toBe("p1");
     });
 
-    test("getLegsToWin calculates correctly for odd legs", () => {
+    test("getLegsToWin returns configured legs value", () => {
       const game = new X01Game(players, configBestOf3);
-      expect(game.getLegsToWin()).toBe(2); // Best of 3 = first to 2
+      expect(game.getLegsToWin()).toBe(3); // First to 3
     });
 
-    test("getLegsToWin calculates correctly for even legs", () => {
-      const game = new X01Game(players, { ...configBestOf3, legs: 4 });
-      expect(game.getLegsToWin()).toBe(3); // Best of 4 = first to 3
+    test("getLegsToWin works for different values", () => {
+      const game = new X01Game(players, { ...configBestOf3, legs: 5 });
+      expect(game.getLegsToWin()).toBe(5); // First to 5
     });
 
     test("single leg game finishes after one leg win", () => {

@@ -41,10 +41,10 @@ export class X01Game implements Game {
 
   /**
    * Get the number of legs a player needs to win the match.
-   * Best of N means first to (N/2 + 1) for even N, or (N+1)/2 for odd N.
+   * "First to N" means the player needs to win N legs.
    */
   getLegsToWin(): number {
-    return Math.floor(this.config.legs / 2) + 1;
+    return this.config.legs;
   }
 
   /**

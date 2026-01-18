@@ -41,6 +41,12 @@ export const GameConfigView = observer(function GameConfigView(): JSX.Element {
     }
   };
 
+  const handleLegsChange = (_: React.MouseEvent<HTMLElement>, value: number | null): void => {
+    if (value !== null) {
+      gameStore.setLegs(value);
+    }
+  };
+
   const handleStartGame = (): void => {
     gameStore.startGame(playerSetupStore.players);
     uiStore.goToGamePlay();
@@ -83,9 +89,21 @@ export const GameConfigView = observer(function GameConfigView(): JSX.Element {
           exclusive
           onChange={handleOutRuleChange}
           fullWidth
+          sx={{ mb: 3 }}
         >
           <ToggleButton value="single">Single Out</ToggleButton>
           <ToggleButton value="double">Double Out</ToggleButton>
+        </ToggleButtonGroup>
+
+        <Typography variant="h6" gutterBottom>
+          Legs (First to)
+        </Typography>
+        <ToggleButtonGroup value={gameStore.legs} exclusive onChange={handleLegsChange} fullWidth>
+          <ToggleButton value={1}>1</ToggleButton>
+          <ToggleButton value={2}>2</ToggleButton>
+          <ToggleButton value={3}>3</ToggleButton>
+          <ToggleButton value={5}>5</ToggleButton>
+          <ToggleButton value={7}>7</ToggleButton>
         </ToggleButtonGroup>
       </Paper>
 
