@@ -1,3 +1,4 @@
+// Build: 1768765445045
 /**
  * Service Worker for Dart Game Counter PWA
  * Provides offline support with a cache-first strategy
