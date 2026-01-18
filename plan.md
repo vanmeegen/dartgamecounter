@@ -14,6 +14,7 @@
 
 ### Missing / Future
 
+- [ ] **E7/S71 - Undo/Redo**: Undo/redo each dart throw in a visit, across all players turn by turn
 - [ ] **S342 - SVG Dartboard**: Clickable dartboard with enlarged double/triple zones
 - [ ] **S16 - Multi-leg support**: Play multiple legs with player rotation
 - [ ] **S32 - Game-specific presets**: Different preset types per game mode
@@ -23,15 +24,16 @@
 
 ## Epics & Stories Overview
 
-| Epic | Description  | Status |
-| ---- | ------------ | ------ |
-| E0   | Foundation   | Done   |
-| E1   | Player Setup | Done   |
-| E2   | Game Setup   | Done   |
-| E3   | Play X01     | Done   |
-| E4   | Checkout     | Done   |
-| E5   | Presets      | Done   |
-| E6   | PWA          | Done   |
+| Epic | Description  | Status  |
+| ---- | ------------ | ------- |
+| E0   | Foundation   | Done    |
+| E1   | Player Setup | Done    |
+| E2   | Game Setup   | Done    |
+| E3   | Play X01     | Done    |
+| E4   | Checkout     | Done    |
+| E5   | Presets      | Done    |
+| E6   | PWA          | Done    |
+| E7   | Undo/Redo    | Pending |
 
 ---
 
@@ -83,6 +85,14 @@
 - [x] Service worker with cache-first strategy
 - [x] iOS/Safari PWA meta tags
 - [x] Build script copies PWA files to dist
+
+---
+
+## Pending Increments
+
+### E7 - Undo/Redo
+
+- [ ] S71: Undo/redo each dart throw in a visit, across all players turn by turn
 
 ---
 
