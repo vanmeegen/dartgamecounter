@@ -3,6 +3,7 @@
  */
 
 import type { JSX } from "react";
+import { observer } from "mobx-react-lite";
 import List from "@mui/material/List";
 import Typography from "@mui/material/Typography";
 import {
@@ -31,7 +32,7 @@ interface PlayerListProps {
   onReorder: (fromIndex: number, toIndex: number) => void;
 }
 
-export function PlayerList({
+export const PlayerList = observer(function PlayerList({
   players,
   editingPlayerId,
   onEdit,
@@ -87,4 +88,4 @@ export function PlayerList({
       </SortableContext>
     </DndContext>
   );
-}
+});
