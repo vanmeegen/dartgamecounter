@@ -34,7 +34,6 @@ const RADII = {
   double: 85, // Double ring (enlarged from standard 84-90%)
   tripleOuter: 70,
   triple: 55, // Triple ring (enlarged from standard 52-58%)
-  singleOuter: 40,
   singleBull: 20, // Single bull (enlarged)
   bull: 10, // Double bull (enlarged)
 };
@@ -127,7 +126,7 @@ function DartboardSegment({ segment, index, cx, cy, onClick }: SegmentProps): JS
       />
       {/* Inner single */}
       <path
-        d={describeArc(cx, cy, scale(RADII.singleOuter), scale(RADII.triple), startAngle, endAngle)}
+        d={describeArc(cx, cy, scale(RADII.singleBull), scale(RADII.triple), startAngle, endAngle)}
         fill={lightColor}
         stroke="#333"
         strokeWidth="0.5"

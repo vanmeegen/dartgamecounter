@@ -50,7 +50,7 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, height: "100%" }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "2px", height: "100%" }}>
       {/* Modifier buttons */}
       <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
         <Button
@@ -95,9 +95,9 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
       </Box>
 
       {/* Number grid */}
-      <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", gap: 0.5 }}>
+      <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", gap: "2px" }}>
         {numbers.map((row, rowIndex) => (
-          <Box key={rowIndex} sx={{ display: "flex", gap: 0.5, flex: 1 }}>
+          <Box key={rowIndex} sx={{ display: "flex", gap: "2px", flex: 1 }}>
             {row.map((num) => (
               <Button
                 key={num}
@@ -106,9 +106,10 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
                 sx={{
                   flex: 1,
                   minWidth: 0,
-                  fontSize: { xs: "1.5rem", sm: "2rem" },
+                  fontSize: "min(8vw, 8vh)",
                   fontWeight: 700,
-                  py: 0,
+                  p: 0,
+                  lineHeight: 1,
                 }}
               >
                 {modifier === 1 ? num : modifier === 2 ? `D${num}` : `T${num}`}
@@ -118,16 +119,17 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
         ))}
 
         {/* Bottom row: 25 and Bull */}
-        <Box sx={{ display: "flex", gap: 0.5, flex: 1 }}>
+        <Box sx={{ display: "flex", gap: "2px", flex: 1 }}>
           <Button
             variant="outlined"
             onClick={handleBull}
             sx={{
               flex: 1,
               minWidth: 0,
-              fontSize: { xs: "1.5rem", sm: "2rem" },
+              fontSize: "min(8vw, 8vh)",
               fontWeight: 700,
-              py: 0,
+              p: 0,
+              lineHeight: 1,
               bgcolor: modifier >= 2 ? "secondary.dark" : undefined,
             }}
           >
