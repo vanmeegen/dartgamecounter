@@ -19,7 +19,8 @@ import { useStores } from "../../hooks/useStores";
 import { isGamePreset, type Preset } from "../../types";
 
 export const PresetList = observer(function PresetList(): JSX.Element {
-  const { presetStore, ...rootStore } = useStores();
+  const rootStore = useStores();
+  const { presetStore } = rootStore;
 
   if (presetStore.isLoading) {
     return (

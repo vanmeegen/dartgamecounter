@@ -1,5 +1,5 @@
 /**
- * ButtonInput - number grid (1-20, 25, Bull) with modifiers (2x, 3x, M)
+ * ButtonInput - number grid (1-20, 25, Bull) with modifiers (S, D, T, M)
  */
 
 import { useState, type JSX } from "react";
@@ -59,7 +59,7 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
           onClick={() => setModifier(1)}
           sx={{ minWidth: 60 }}
         >
-          1x
+          S
         </Button>
         <Button
           variant={modifier === 2 ? "contained" : "outlined"}
@@ -67,7 +67,7 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
           onClick={() => setModifier(2)}
           sx={{ minWidth: 60 }}
         >
-          2x
+          D
         </Button>
         <Button
           variant={modifier === 3 ? "contained" : "outlined"}
@@ -75,7 +75,7 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
           onClick={() => setModifier(3)}
           sx={{ minWidth: 60 }}
         >
-          3x
+          T
         </Button>
         <Button variant="outlined" color="error" onClick={handleMiss} sx={{ minWidth: 60 }}>
           M
