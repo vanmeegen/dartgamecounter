@@ -12,13 +12,13 @@
 - [x] **E5 - Presets**: S14 (IndexedDB persistence), S15 (preset list), S23 (full game presets)
 - [x] **E6 - PWA**: manifest.json, service worker, iOS meta tags
 
-### Missing / Future
+### Missing / Future (ordered by priority)
 
-- [ ] **E7/S71 - Undo/Redo**: Undo/redo each dart throw in a visit, across all players turn by turn
-- [ ] **S342 - SVG Dartboard**: Clickable dartboard with enlarged double/triple zones
-- [ ] **S16 - Multi-leg support**: Play multiple legs with player rotation
-- [ ] **S32 - Game-specific presets**: Different preset types per game mode
-- [ ] **S24 - Other game modes**: Cricket, Around the Clock, etc.
+1. [ ] **E7/S71 - Undo/Redo**: Undo/redo each dart throw in a visit, across all players turn by turn
+2. [ ] **S16 - Multi-leg support**: Play multiple legs with player rotation
+3. [ ] **S342 - SVG Dartboard**: Clickable dartboard with enlarged double/triple zones
+4. [ ] **S24 - Other game modes**: Cricket, Around the Clock, etc.
+5. [ ] **S32 - Game-specific presets**: Different preset types per game mode
 
 ---
 
