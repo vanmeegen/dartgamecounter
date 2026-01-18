@@ -8,6 +8,18 @@ import { UIStore } from "./UIStore";
 import { PresetStore } from "./PresetStore";
 import { isGamePreset, type Preset } from "../types";
 
+/**
+ * Fisher-Yates shuffle algorithm for randomizing arrays
+ */
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export class RootStore {
   playerSetupStore: PlayerSetupStore;
   gameStore: GameStore;
@@ -51,11 +63,15 @@ export class RootStore {
 
   /**
    * Load a preset - either player names only or full game config
+   * Player order is randomized for fair starting position
    */
   loadPreset(preset: Preset): void {
+    // Randomize player order for fair game starts
+    const shuffledNames = shuffleArray(preset.playerNames);
+
     // Set up players from preset
     this.playerSetupStore.reset();
-    preset.playerNames.forEach((name) => {
+    shuffledNames.forEach((name) => {
       this.playerSetupStore.addPlayer(name);
     });
 
