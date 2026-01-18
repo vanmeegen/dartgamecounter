@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import plugin from "bun-plugin-tailwind";
 import { existsSync } from "fs";
-import { rm } from "fs/promises";
+import { rm, copyFile, mkdir } from "fs/promises";
 import path from "path";
 
 if (process.argv.includes("--help") || process.argv.includes("-h")) {
@@ -138,6 +138,17 @@ const result = await Bun.build({
 });
 
 const end = performance.now();
+
+// Copy PWA static files to dist
+const staticFiles = ["manifest.json", "sw.js"];
+await mkdir(outdir, { recursive: true });
+for (const file of staticFiles) {
+  const srcPath = path.join("src", file);
+  const destPath = path.join(outdir, file);
+  if (existsSync(srcPath)) {
+    await copyFile(srcPath, destPath);
+  }
+}
 
 const outputTable = result.outputs.map((output) => ({
   File: path.relative(process.cwd(), output.path),

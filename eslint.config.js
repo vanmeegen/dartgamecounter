@@ -42,6 +42,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ["dist/**", "node_modules/**", "build.ts"],
+    ignores: ["dist/**", "node_modules/**", "build.ts", "src/sw.js"],
   }
 );
