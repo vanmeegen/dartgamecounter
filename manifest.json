@@ -2,14 +2,15 @@
   "name": "Dart Game Counter",
   "short_name": "Dart Counter",
   "description": "Track dart game scores for 301 and 501 games",
-  "start_url": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#1976d2",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/logo.svg",
+      "src": "./logo.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
