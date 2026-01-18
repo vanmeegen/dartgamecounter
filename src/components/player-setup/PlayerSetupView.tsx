@@ -7,10 +7,12 @@ import { observer } from "mobx-react-lite";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
+import Divider from "@mui/material/Divider";
 import { usePlayerSetupStore, useUIStore } from "../../hooks/useStores";
 import { AddPlayerForm } from "./AddPlayerForm";
 import { PlayerList } from "./PlayerList";
 import { NextButton } from "./NextButton";
+import { PresetList } from "../presets/PresetList";
 
 export const PlayerSetupView = observer(function PlayerSetupView(): JSX.Element {
   const playerSetupStore = usePlayerSetupStore();
@@ -49,6 +51,12 @@ export const PlayerSetupView = observer(function PlayerSetupView(): JSX.Element 
         Players
       </Typography>
 
+      {/* Presets section */}
+      <PresetList />
+
+      <Divider sx={{ my: 2 }} />
+
+      {/* Manual player setup */}
       <AddPlayerForm onAdd={handleAddPlayer} />
 
       <Box sx={{ my: 3 }}>

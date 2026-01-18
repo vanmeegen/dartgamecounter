@@ -5,16 +5,20 @@
 import { PlayerSetupStore } from "./PlayerSetupStore";
 import { GameStore } from "./GameStore";
 import { UIStore } from "./UIStore";
+import { PresetStore } from "./PresetStore";
+import { isGamePreset, type Preset } from "../types";
 
 export class RootStore {
   playerSetupStore: PlayerSetupStore;
   gameStore: GameStore;
   uiStore: UIStore;
+  presetStore: PresetStore;
 
   constructor() {
     this.playerSetupStore = new PlayerSetupStore();
     this.gameStore = new GameStore();
     this.uiStore = new UIStore();
+    this.presetStore = new PresetStore();
   }
 
   /**
@@ -43,5 +47,46 @@ export class RootStore {
     this.playerSetupStore.reset();
     this.gameStore.reset();
     this.uiStore.reset();
+  }
+
+  /**
+   * Load a preset - either player names only or full game config
+   */
+  loadPreset(preset: Preset): void {
+    // Set up players from preset
+    this.playerSetupStore.reset();
+    preset.playerNames.forEach((name) => {
+      this.playerSetupStore.addPlayer(name);
+    });
+
+    if (isGamePreset(preset)) {
+      // Full game preset - configure and start game
+      this.gameStore.setVariant(preset.gameConfig.variant);
+      this.gameStore.setOutRule(preset.gameConfig.outRule);
+      this.gameStore.setLegs(preset.gameConfig.legs);
+      this.startNewGame();
+    } else {
+      // Player-only preset - go to game config
+      this.uiStore.goToGameConfig();
+    }
+  }
+
+  /**
+   * Save current setup as a player preset
+   */
+  async saveCurrentAsPlayerPreset(name: string): Promise<boolean> {
+    const playerNames = this.playerSetupStore.players.map((p) => p.name);
+    const preset = await this.presetStore.savePlayerPreset(name, playerNames);
+    return preset !== null;
+  }
+
+  /**
+   * Save current setup as a full game preset
+   */
+  async saveCurrentAsGamePreset(name: string): Promise<boolean> {
+    const playerNames = this.playerSetupStore.players.map((p) => p.name);
+    const gameConfig = this.gameStore.config;
+    const preset = await this.presetStore.saveGamePreset(name, playerNames, gameConfig);
+    return preset !== null;
   }
 }

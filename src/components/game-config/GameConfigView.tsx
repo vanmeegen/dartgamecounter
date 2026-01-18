@@ -2,7 +2,7 @@
  * GameConfigView - main view for game configuration (E2)
  */
 
-import type { JSX } from "react";
+import { useState, type JSX } from "react";
 import { observer } from "mobx-react-lite";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
@@ -10,13 +10,17 @@ import Button from "@mui/material/Button";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import SaveIcon from "@mui/icons-material/Save";
 import { useStores } from "../../hooks/useStores";
+import { SavePresetDialog } from "../presets/SavePresetDialog";
 import type { X01Variant, OutRule } from "../../types";
 
 export const GameConfigView = observer(function GameConfigView(): JSX.Element {
   const { playerSetupStore, gameStore, uiStore } = useStores();
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
 
   const handleBack = (): void => {
     uiStore.goToPlayerSetup();
@@ -85,16 +89,29 @@ export const GameConfigView = observer(function GameConfigView(): JSX.Element {
         </ToggleButtonGroup>
       </Paper>
 
-      <Button
-        fullWidth
-        variant="contained"
-        size="large"
-        startIcon={<PlayArrowIcon />}
-        onClick={handleStartGame}
-        disabled={playerSetupStore.players.length === 0}
-      >
-        Start Game
-      </Button>
+      <Box sx={{ display: "flex", gap: 2 }}>
+        <Button
+          variant="outlined"
+          size="large"
+          startIcon={<SaveIcon />}
+          onClick={() => setShowSaveDialog(true)}
+          disabled={playerSetupStore.players.length === 0}
+        >
+          Save Preset
+        </Button>
+        <Button
+          fullWidth
+          variant="contained"
+          size="large"
+          startIcon={<PlayArrowIcon />}
+          onClick={handleStartGame}
+          disabled={playerSetupStore.players.length === 0}
+        >
+          Start Game
+        </Button>
+      </Box>
+
+      <SavePresetDialog open={showSaveDialog} onClose={() => setShowSaveDialog(false)} />
     </Container>
   );
 });

@@ -41,3 +41,7 @@ export function useGameStore(): RootStore["gameStore"] {
 export function useUIStore(): RootStore["uiStore"] {
   return useStores().uiStore;
 }
+
+export function usePresetStore(): RootStore["presetStore"] {
+  return useStores().presetStore;
+}
