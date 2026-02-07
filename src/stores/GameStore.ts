@@ -1,57 +1,75 @@
 /**
- * GameStore - manages game configuration and current game instance
+ * GameStore - manages game selection, configuration, and current game instance.
+ * Generic: uses the game registry to support any registered game type.
  */
 
 import { makeAutoObservable } from "mobx";
-import type { Player, X01Config, X01Variant, OutRule, Dart } from "../types";
-import { X01Game } from "../games";
+import type { Player, Dart } from "../types";
+import type { Game, GameDefinition } from "../games/types";
+import { gameRegistry } from "../games/registry";
 
 export class GameStore {
-  // Configuration
-  variant: X01Variant = 501;
-  outRule: OutRule = "double";
-  legs = 1;
+  /** Currently selected game type id (e.g., "x01") */
+  selectedGameId: string | null = null;
 
-  // Current game instance
-  currentGame: X01Game | null = null;
+  /** Game-specific configuration (shape depends on selectedGameId) */
+  gameConfig: unknown = null;
+
+  /** Current active game instance */
+  currentGame: Game | null = null;
 
   constructor() {
     makeAutoObservable(this);
   }
 
-  setVariant(variant: X01Variant): void {
-    this.variant = variant;
+  /**
+   * Select a game type from the registry.
+   * Initializes the config to the game's default.
+   */
+  selectGame(gameId: string): void {
+    const definition = gameRegistry.get(gameId);
+    if (!definition) return;
+
+    this.selectedGameId = gameId;
+    this.gameConfig = structuredClone(definition.defaultConfig);
   }
 
-  setOutRule(outRule: OutRule): void {
-    this.outRule = outRule;
+  /**
+   * Update the game-specific configuration.
+   */
+  updateConfig(config: unknown): void {
+    this.gameConfig = config;
   }
 
-  setLegs(legs: number): void {
-    this.legs = Math.max(1, legs);
-  }
-
-  get config(): X01Config {
-    return {
-      variant: this.variant,
-      outRule: this.outRule,
-      legs: this.legs,
-    };
-  }
-
+  /**
+   * Start a new game with the given players and current config.
+   */
   startGame(players: Player[]): void {
-    if (players.length === 0) return;
-    this.currentGame = new X01Game(players, this.config);
+    if (!this.selectedGameId || players.length === 0) return;
+
+    const definition = gameRegistry.get(this.selectedGameId);
+    if (!definition) return;
+
+    this.currentGame = definition.createGame(players, this.gameConfig);
   }
 
+  /**
+   * Record a dart throw in the current game.
+   */
   recordThrow(dart: Dart): void {
     this.currentGame?.recordThrow(dart);
   }
 
+  /**
+   * Undo the last throw.
+   */
   undoLastThrow(): boolean {
     return this.currentGame?.undoLastThrow() ?? false;
   }
 
+  /**
+   * Advance to the next leg.
+   */
   nextLeg(): void {
     this.currentGame?.nextLeg();
   }
@@ -64,14 +82,21 @@ export class GameStore {
     return this.currentGame?.isFinished() ?? false;
   }
 
+  /**
+   * Get the current game definition from the registry.
+   */
+  get currentGameDefinition(): GameDefinition | null {
+    if (!this.selectedGameId) return null;
+    return gameRegistry.get(this.selectedGameId) ?? null;
+  }
+
   endGame(): void {
     this.currentGame = null;
   }
 
   reset(): void {
     this.currentGame = null;
-    this.variant = 501;
-    this.outRule = "double";
-    this.legs = 1;
+    this.selectedGameId = null;
+    this.gameConfig = null;
   }
 }

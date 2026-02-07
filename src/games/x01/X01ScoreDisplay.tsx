@@ -1,5 +1,5 @@
 /**
- * PlayerScoreDisplay - shows player scores (current player large, others small)
+ * X01ScoreDisplay - shows player scores (current player large, others small)
  * with per-visit average in the lower-right corner of each badge
  */
 
@@ -9,9 +9,9 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Chip from "@mui/material/Chip";
-import type { X01Game } from "../../games";
+import type { X01Game } from "./X01Game";
 
-interface PlayerScoreDisplayProps {
+interface X01ScoreDisplayProps {
   game: X01Game;
 }
 
@@ -20,9 +20,9 @@ function formatAverage(avg: number): string {
   return avg % 1 === 0 ? avg.toFixed(0) : avg.toFixed(1);
 }
 
-export const PlayerScoreDisplay = observer(function PlayerScoreDisplay({
+export const X01ScoreDisplay = observer(function X01ScoreDisplay({
   game,
-}: PlayerScoreDisplayProps): JSX.Element {
+}: X01ScoreDisplayProps): JSX.Element {
   const currentPlayer = game.getCurrentPlayer();
   const currentScore = game.getPlayerScore(currentPlayer.id);
   const currentAverage = game.getPlayerAverage(currentPlayer.id);

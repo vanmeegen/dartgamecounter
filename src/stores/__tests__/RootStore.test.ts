@@ -1,6 +1,26 @@
 import { describe, expect, test, beforeEach } from "bun:test";
 import { RootStore } from "../RootStore";
 import type { GamePreset, PlayerPreset } from "../../types";
+import { gameRegistry } from "../../games/registry";
+import { X01Game } from "../../games/x01/X01Game";
+import type { X01Config } from "../../games/x01/types";
+
+// Register X01 for testing (without importing full module to avoid circular deps with useStores)
+if (!gameRegistry.has("x01")) {
+  gameRegistry.register<X01Config>({
+    id: "x01",
+    name: "X01",
+    description: "Classic countdown (301/501)",
+    minPlayers: 1,
+    maxPlayers: 8,
+    defaultConfig: { variant: 501, outRule: "double", legs: 1 },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ConfigComponent: (() => null) as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    PlayComponent: (() => null) as any,
+    createGame: (players, config) => new X01Game(players, config as X01Config),
+  });
+}
 
 describe("RootStore", () => {
   let rootStore: RootStore;
@@ -13,7 +33,6 @@ describe("RootStore", () => {
     const playerPreset: PlayerPreset = {
       id: "preset-1",
       name: "Test Preset",
-      type: "player",
       playerNames: ["Alice", "Bob", "Charlie"],
       createdAt: Date.now(),
     };
@@ -42,7 +61,7 @@ describe("RootStore", () => {
       const gamePreset: GamePreset = {
         id: "preset-2",
         name: "Test Game Preset",
-        type: "game",
+        gameType: "x01",
         playerNames: ["Alice", "Bob", "Charlie", "David"],
         gameConfig: { variant: 501, outRule: "double", legs: 3 },
         createdAt: Date.now(),

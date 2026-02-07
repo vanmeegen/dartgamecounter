@@ -4,13 +4,12 @@
 
 import { makeAutoObservable, runInAction } from "mobx";
 import { openDB, type IDBPDatabase } from "idb";
-import type { PlayerPreset, GamePreset, Preset, X01Config } from "../types";
+import type { PlayerPreset, GamePreset, Preset } from "../types";
 
 const DB_NAME = "dartgamecounter";
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const PRESET_STORE = "presets";
 const PLAYERS_STORE = "rememberedPlayers";
-const STATS_STORE = "playerStatistics";
 
 export class PresetStore {
   presets: Preset[] = [];
@@ -35,10 +34,12 @@ export class PresetStore {
               db.createObjectStore(PLAYERS_STORE, { keyPath: "name" });
             }
           }
-          if (oldVersion < 3) {
-            if (!db.objectStoreNames.contains(STATS_STORE)) {
-              db.createObjectStore(STATS_STORE, { keyPath: "playerName" });
+          // v3 → v4: playerStatistics store is handled by StatisticsStore
+          if (oldVersion < 4) {
+            if (db.objectStoreNames.contains("playerStatistics")) {
+              db.deleteObjectStore("playerStatistics");
             }
+            db.createObjectStore("playerStatistics", { keyPath: "key" });
           }
         },
       });
@@ -60,7 +61,13 @@ export class PresetStore {
         this.db.getAll(PLAYERS_STORE),
       ]);
       runInAction(() => {
-        this.presets = presets;
+        // Migrate old presets that don't have gameType
+        this.presets = presets.map((p: Preset) => {
+          if ("gameConfig" in p && !("gameType" in p)) {
+            return { ...p, gameType: "x01" } as GamePreset;
+          }
+          return p;
+        });
         this.rememberedPlayers = players.map((p: { name: string }) => p.name).sort();
         this.isLoading = false;
       });
@@ -95,11 +102,12 @@ export class PresetStore {
     }
   }
 
-  /** Save a full game preset */
+  /** Save a full game preset (game type + config) */
   async saveGamePreset(
     name: string,
     playerNames: string[],
-    gameConfig: X01Config
+    gameType: string,
+    gameConfig: Record<string, unknown>
   ): Promise<GamePreset | null> {
     if (!this.db || playerNames.length === 0) return null;
 
@@ -107,6 +115,7 @@ export class PresetStore {
       id: crypto.randomUUID(),
       name,
       playerNames,
+      gameType,
       gameConfig,
       createdAt: Date.now(),
     };

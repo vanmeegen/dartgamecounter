@@ -3,10 +3,17 @@
  */
 
 import { makeAutoObservable } from "mobx";
-import type { Game } from "./Game";
-import type { Dart, Player, PlayerScore, X01Config, X01State, CheckoutSuggestion } from "../types";
-import { getDartValue, isDouble } from "../types/dart.types";
-import { getCheckoutSuggestion } from "../utils/checkout";
+import type { Game } from "../types";
+import type { Dart, Player } from "../../types";
+import { getDartValue, isDouble } from "../../types/dart.types";
+import { getCheckoutSuggestion } from "./checkout";
+import type {
+  X01Config,
+  X01State,
+  X01PlayerScore,
+  CheckoutSuggestion,
+  CompletedLeg,
+} from "./types";
 
 export class X01Game implements Game {
   readonly type = "x01" as const;
@@ -261,7 +268,7 @@ export class X01Game implements Game {
     return playerScore?.legsWon ?? 0;
   }
 
-  private getCurrentPlayerScore(): PlayerScore {
+  private getCurrentPlayerScore(): X01PlayerScore {
     return this.state.players[this.state.currentPlayerIndex];
   }
 
@@ -317,7 +324,7 @@ export class X01Game implements Game {
    * Get all completed legs including the current leg (if finished).
    * Used for statistics calculation.
    */
-  getAllCompletedLegs(): import("../types").CompletedLeg[] {
+  getAllCompletedLegs(): CompletedLeg[] {
     const legs = [...this.state.completedLegs];
     // Include current leg if it's finished
     if (this.state.legFinished) {

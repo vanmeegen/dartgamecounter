@@ -10,6 +10,9 @@ import { PlayerSetupView } from "./components/player-setup/PlayerSetupView";
 import { GameConfigView } from "./components/game-config/GameConfigView";
 import { GamePlayView } from "./components/game-play/GamePlayView";
 
+// Register all game modules
+import "./games/x01";
+
 const AppContent = observer(function AppContent(): JSX.Element {
   const uiStore = useUIStore();
 

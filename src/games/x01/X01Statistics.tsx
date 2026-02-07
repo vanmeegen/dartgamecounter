@@ -1,5 +1,5 @@
 /**
- * GameStatistics - displays current game and all-time statistics for all players
+ * X01Statistics - displays current game and all-time statistics for X01 games
  */
 
 import type { JSX } from "react";
@@ -12,7 +12,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import type { PlayerStats, AllTimePlayerStats } from "../../types";
+import type { X01PlayerStats, X01AllTimePlayerStats } from "./types";
 
 interface StatsEntry {
   label: string;
@@ -23,8 +23,11 @@ function formatNumber(n: number, decimals = 0): string {
   return n.toFixed(decimals).replace(".", ",");
 }
 
-function buildGameStatsRows(playerNames: string[], stats: Map<string, PlayerStats>): StatsEntry[] {
-  const get = (name: string): PlayerStats | undefined => stats.get(name);
+function buildGameStatsRows(
+  playerNames: string[],
+  stats: Map<string, X01PlayerStats>
+): StatsEntry[] {
+  const get = (name: string): X01PlayerStats | undefined => stats.get(name);
   return [
     {
       label: "Legs gewonnen",
@@ -85,9 +88,9 @@ function buildGameStatsRows(playerNames: string[], stats: Map<string, PlayerStat
 
 function buildAllTimeStatsRows(
   playerNames: string[],
-  stats: Map<string, AllTimePlayerStats | null>
+  stats: Map<string, X01AllTimePlayerStats | null>
 ): StatsEntry[] {
-  const get = (name: string): AllTimePlayerStats | null | undefined => stats.get(name);
+  const get = (name: string): X01AllTimePlayerStats | null | undefined => stats.get(name);
   return [
     {
       label: "Spiele",
@@ -199,17 +202,17 @@ function StatsTable({
   );
 }
 
-interface GameStatisticsProps {
+interface X01StatisticsProps {
   playerNames: string[];
-  currentGameStats: Map<string, PlayerStats>;
-  allTimeStats: Map<string, AllTimePlayerStats | null>;
+  currentGameStats: Map<string, X01PlayerStats>;
+  allTimeStats: Map<string, X01AllTimePlayerStats | null>;
 }
 
-export const GameStatistics = observer(function GameStatistics({
+export const X01Statistics = observer(function X01Statistics({
   playerNames,
   currentGameStats,
   allTimeStats,
-}: GameStatisticsProps): JSX.Element {
+}: X01StatisticsProps): JSX.Element {
   const gameRows = buildGameStatsRows(playerNames, currentGameStats);
   const allTimeRows = buildAllTimeStatsRows(playerNames, allTimeStats);
 

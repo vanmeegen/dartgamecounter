@@ -1,18 +1,17 @@
 /**
- * Statistics calculation utilities
+ * X01-specific statistics calculation
  */
 
-import type { CompletedLeg, VisitRecord } from "../types/game.types";
-import type { PlayerStats } from "../types/statistics.types";
+import type { CompletedLeg, VisitRecord, X01PlayerStats, X01AllTimePlayerStats } from "./types";
 
 /**
  * Calculate statistics for a player from a set of completed legs.
  */
-export function calculatePlayerStats(
+export function calculateX01PlayerStats(
   playerId: string,
   completedLegs: CompletedLeg[],
   gameVariant: number
-): PlayerStats {
+): X01PlayerStats {
   let totalDarts = 0;
   let totalPointsScored = 0;
   let highestVisit = 0;
@@ -99,4 +98,26 @@ function countPointsInVisits(
     return gameVariant;
   }
   return total;
+}
+
+/** Helper to create empty X01 all-time stats */
+export function createEmptyX01Stats(playerName: string): X01AllTimePlayerStats {
+  return {
+    playerName,
+    gameType: "x01",
+    gamesPlayed: 0,
+    gamesWon: 0,
+    legsPlayed: 0,
+    legsWon: 0,
+    totalDarts: 0,
+    totalPointsScored: 0,
+    highestVisit: 0,
+    bestLeg: null,
+    visits60Plus: 0,
+    visits100Plus: 0,
+    visits140Plus: 0,
+    visits180: 0,
+    totalDartsInWonLegs: 0,
+    wonLegCount: 0,
+  };
 }

@@ -1,20 +1,20 @@
 /**
- * CheckoutDisplay - shows checkout suggestion when in range
+ * X01CheckoutDisplay - shows checkout suggestion when in range
  */
 
 import type { JSX } from "react";
 import { observer } from "mobx-react-lite";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import type { CheckoutSuggestion } from "../../types";
+import type { CheckoutSuggestion } from "./types";
 
-interface CheckoutDisplayProps {
+interface X01CheckoutDisplayProps {
   suggestion: CheckoutSuggestion | null;
 }
 
-export const CheckoutDisplay = observer(function CheckoutDisplay({
+export const X01CheckoutDisplay = observer(function X01CheckoutDisplay({
   suggestion,
-}: CheckoutDisplayProps): JSX.Element | null {
+}: X01CheckoutDisplayProps): JSX.Element | null {
   if (!suggestion) return null;
 
   return (

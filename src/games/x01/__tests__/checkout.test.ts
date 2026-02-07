@@ -2,7 +2,7 @@
  * Tests for checkout calculator utility
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { calculateCheckout, getCheckoutSuggestion, COMMON_CHECKOUTS } from "../checkout";
 
 describe("calculateCheckout", () => {

@@ -2,8 +2,6 @@
  * Preset type definitions for saving/loading game configurations
  */
 
-import type { X01Config } from "./game.types";
-
 /** Player preset - just names */
 export interface PlayerPreset {
   id: string;
@@ -12,12 +10,15 @@ export interface PlayerPreset {
   createdAt: number;
 }
 
-/** Full game preset - players + game configuration */
+/** Full game preset - players + game type + game configuration */
 export interface GamePreset {
   id: string;
   name: string;
   playerNames: string[];
-  gameConfig: X01Config;
+  /** Game type identifier (e.g., "x01", "cricket") */
+  gameType: string;
+  /** Game-specific configuration (shape depends on gameType) */
+  gameConfig: Record<string, unknown>;
   createdAt: number;
 }
 

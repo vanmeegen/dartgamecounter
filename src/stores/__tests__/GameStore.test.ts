@@ -1,6 +1,26 @@
 import { describe, expect, test, beforeEach } from "bun:test";
 import { GameStore } from "../GameStore";
 import type { Player } from "../../types";
+import { gameRegistry } from "../../games/registry";
+import { X01Game } from "../../games/x01/X01Game";
+import type { X01Config } from "../../games/x01/types";
+
+// Register X01 for testing (without importing full module to avoid circular deps with useStores)
+if (!gameRegistry.has("x01")) {
+  gameRegistry.register<X01Config>({
+    id: "x01",
+    name: "X01",
+    description: "Classic countdown (301/501)",
+    minPlayers: 1,
+    maxPlayers: 8,
+    defaultConfig: { variant: 501, outRule: "double", legs: 1 },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ConfigComponent: (() => null) as any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    PlayComponent: (() => null) as any,
+    createGame: (players, config) => new X01Game(players, config as X01Config),
+  });
+}
 
 describe("GameStore", () => {
   let store: GameStore;
@@ -13,54 +33,63 @@ describe("GameStore", () => {
     store = new GameStore();
   });
 
-  describe("configuration", () => {
-    test("has default config", () => {
-      expect(store.variant).toBe(501);
-      expect(store.outRule).toBe("double");
-      expect(store.legs).toBe(1);
+  describe("game selection", () => {
+    test("has no game selected initially", () => {
+      expect(store.selectedGameId).toBeNull();
+      expect(store.gameConfig).toBeNull();
     });
 
-    test("setVariant updates variant", () => {
-      store.setVariant(301);
-      expect(store.variant).toBe(301);
+    test("selectGame sets game id and default config", () => {
+      store.selectGame("x01");
+      expect(store.selectedGameId).toBe("x01");
+      expect(store.gameConfig).toEqual({ variant: 501, outRule: "double", legs: 1 });
     });
 
-    test("setOutRule updates out rule", () => {
-      store.setOutRule("single");
-      expect(store.outRule).toBe("single");
+    test("selectGame ignores unknown game types", () => {
+      store.selectGame("unknown-game");
+      expect(store.selectedGameId).toBeNull();
+      expect(store.gameConfig).toBeNull();
     });
 
-    test("setLegs updates legs (minimum 1)", () => {
-      store.setLegs(3);
-      expect(store.legs).toBe(3);
-      store.setLegs(0);
-      expect(store.legs).toBe(1);
+    test("updateConfig replaces the config", () => {
+      store.selectGame("x01");
+      store.updateConfig({ variant: 301, outRule: "single", legs: 3 });
+      expect(store.gameConfig).toEqual({ variant: 301, outRule: "single", legs: 3 });
     });
   });
 
   describe("startGame", () => {
     test("creates a new game instance", () => {
+      store.selectGame("x01");
       expect(store.currentGame).toBeNull();
       store.startGame(players);
       expect(store.currentGame).not.toBeNull();
     });
 
     test("does not start with empty players", () => {
+      store.selectGame("x01");
       store.startGame([]);
       expect(store.currentGame).toBeNull();
     });
 
-    test("initializes game with correct config", () => {
-      store.setVariant(301);
-      store.setOutRule("single");
+    test("does not start without selecting a game", () => {
       store.startGame(players);
-      expect(store.currentGame?.config.variant).toBe(301);
-      expect(store.currentGame?.config.outRule).toBe("single");
+      expect(store.currentGame).toBeNull();
+    });
+
+    test("initializes game with current config", () => {
+      store.selectGame("x01");
+      store.updateConfig({ variant: 301, outRule: "single", legs: 1 });
+      store.startGame(players);
+      expect(store.currentGame).not.toBeNull();
+      expect((store.currentGame as unknown as X01Game).config.variant).toBe(301);
+      expect((store.currentGame as unknown as X01Game).config.outRule).toBe("single");
     });
   });
 
   describe("game state", () => {
     test("isGameActive returns true when game is running", () => {
+      store.selectGame("x01");
       store.startGame(players);
       expect(store.isGameActive).toBe(true);
     });
@@ -70,18 +99,33 @@ describe("GameStore", () => {
     });
 
     test("endGame clears current game", () => {
+      store.selectGame("x01");
       store.startGame(players);
       store.endGame();
       expect(store.currentGame).toBeNull();
     });
   });
 
+  describe("currentGameDefinition", () => {
+    test("returns null when no game selected", () => {
+      expect(store.currentGameDefinition).toBeNull();
+    });
+
+    test("returns definition when game selected", () => {
+      store.selectGame("x01");
+      expect(store.currentGameDefinition).not.toBeNull();
+      expect(store.currentGameDefinition?.id).toBe("x01");
+      expect(store.currentGameDefinition?.name).toBe("X01");
+    });
+  });
+
   describe("reset", () => {
     test("resets to default state", () => {
-      store.setVariant(301);
+      store.selectGame("x01");
       store.startGame(players);
       store.reset();
-      expect(store.variant).toBe(501);
+      expect(store.selectedGameId).toBeNull();
+      expect(store.gameConfig).toBeNull();
       expect(store.currentGame).toBeNull();
     });
   });

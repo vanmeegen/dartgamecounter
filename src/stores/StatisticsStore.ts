@@ -1,39 +1,27 @@
 /**
- * StatisticsStore - manages all-time player statistics with IndexedDB persistence
+ * StatisticsStore - manages per-game all-time player statistics with IndexedDB persistence.
+ *
+ * Statistics are stored per (gameType, playerName) pair.
+ * Each game module defines its own stats shape; this store handles generic storage.
  */
 
 import { makeAutoObservable, runInAction } from "mobx";
 import { openDB, type IDBPDatabase } from "idb";
-import type { AllTimePlayerStats } from "../types";
-import type { CompletedLeg } from "../types/game.types";
-import { calculatePlayerStats } from "../utils/statistics";
+import type { StoredPlayerStats } from "../types";
+import { calculateX01PlayerStats, createEmptyX01Stats } from "../games/x01/statistics";
+import type { X01AllTimePlayerStats, CompletedLeg } from "../games/x01/types";
 
 const DB_NAME = "dartgamecounter";
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const STATS_STORE = "playerStatistics";
 
-function createEmptyStats(playerName: string): AllTimePlayerStats {
-  return {
-    playerName,
-    gamesPlayed: 0,
-    gamesWon: 0,
-    legsPlayed: 0,
-    legsWon: 0,
-    totalDarts: 0,
-    totalPointsScored: 0,
-    highestVisit: 0,
-    bestLeg: null,
-    visits60Plus: 0,
-    visits100Plus: 0,
-    visits140Plus: 0,
-    visits180: 0,
-    totalDartsInWonLegs: 0,
-    wonLegCount: 0,
-  };
+function makeKey(gameType: string, playerName: string): string {
+  return `${gameType}:${playerName}`;
 }
 
 export class StatisticsStore {
-  allTimeStats = new Map<string, AllTimePlayerStats>();
+  /** Map of all-time stats keyed by `${gameType}:${playerName}` */
+  allTimeStats = new Map<string, StoredPlayerStats>();
   isLoading = true;
   private db: IDBPDatabase | null = null;
 
@@ -55,10 +43,12 @@ export class StatisticsStore {
               db.createObjectStore("rememberedPlayers", { keyPath: "name" });
             }
           }
-          if (oldVersion < 3) {
-            if (!db.objectStoreNames.contains(STATS_STORE)) {
-              db.createObjectStore(STATS_STORE, { keyPath: "playerName" });
+          // Migrate from v3 (old playerStatistics by playerName) to v4 (by composite key)
+          if (oldVersion < 4) {
+            if (db.objectStoreNames.contains(STATS_STORE)) {
+              db.deleteObjectStore(STATS_STORE);
             }
+            db.createObjectStore(STATS_STORE, { keyPath: "key" });
           }
         },
       });
@@ -77,7 +67,7 @@ export class StatisticsStore {
     try {
       const stats = await this.db.getAll(STATS_STORE);
       runInAction(() => {
-        this.allTimeStats = new Map(stats.map((s: AllTimePlayerStats) => [s.playerName, s]));
+        this.allTimeStats = new Map(stats.map((s: StoredPlayerStats) => [s.key, s]));
         this.isLoading = false;
       });
     } catch {
@@ -89,9 +79,11 @@ export class StatisticsStore {
   }
 
   /**
-   * Record a completed game's statistics for all players.
+   * Record game statistics for X01.
+   * Dispatches to game-specific stats calculation.
    */
   async recordGameStats(
+    gameType: string,
     playerNames: string[],
     completedLegs: CompletedLeg[],
     playerIdToName: Map<string, string>,
@@ -100,15 +92,41 @@ export class StatisticsStore {
   ): Promise<void> {
     if (!this.db || completedLegs.length === 0) return;
 
+    if (gameType === "x01") {
+      await this.recordX01Stats(
+        playerNames,
+        completedLegs,
+        playerIdToName,
+        gameVariant,
+        matchWinnerName
+      );
+    }
+    // Future game types add their own branches here
+  }
+
+  private async recordX01Stats(
+    playerNames: string[],
+    completedLegs: CompletedLeg[],
+    playerIdToName: Map<string, string>,
+    gameVariant: number,
+    matchWinnerName: string | null
+  ): Promise<void> {
+    if (!this.db) return;
+
     for (const playerName of playerNames) {
       const playerId = [...playerIdToName.entries()].find(([, name]) => name === playerName)?.[0];
       if (!playerId) continue;
 
-      const gameStats = calculatePlayerStats(playerId, completedLegs, gameVariant);
-      const existing = this.allTimeStats.get(playerName) ?? createEmptyStats(playerName);
+      const gameStats = calculateX01PlayerStats(playerId, completedLegs, gameVariant);
+      const key = makeKey("x01", playerName);
+      const existingRecord = this.allTimeStats.get(key);
+      const existing: X01AllTimePlayerStats = existingRecord
+        ? (existingRecord.data as unknown as X01AllTimePlayerStats)
+        : createEmptyX01Stats(playerName);
 
-      const updated: AllTimePlayerStats = {
+      const updated: X01AllTimePlayerStats = {
         playerName,
+        gameType: "x01",
         gamesPlayed: existing.gamesPlayed + 1,
         gamesWon: existing.gamesWon + (matchWinnerName === playerName ? 1 : 0),
         legsPlayed: existing.legsPlayed + gameStats.legsPlayed,
@@ -127,10 +145,17 @@ export class StatisticsStore {
         wonLegCount: existing.wonLegCount + gameStats.legsWon,
       };
 
+      const record: StoredPlayerStats = {
+        key,
+        gameType: "x01",
+        playerName,
+        data: updated as unknown as Record<string, unknown>,
+      };
+
       try {
-        await this.db.put(STATS_STORE, updated);
+        await this.db.put(STATS_STORE, record);
         runInAction(() => {
-          this.allTimeStats.set(playerName, updated);
+          this.allTimeStats.set(key, record);
         });
       } catch {
         console.error(`Failed to save statistics for ${playerName}`);
@@ -138,19 +163,22 @@ export class StatisticsStore {
     }
   }
 
-  /** Get all-time stats for a player */
-  getPlayerStats(playerName: string): AllTimePlayerStats | null {
-    return this.allTimeStats.get(playerName) ?? null;
+  /** Get all-time stats for a player in a specific game type */
+  getPlayerStats(gameType: string, playerName: string): Record<string, unknown> | null {
+    const key = makeKey(gameType, playerName);
+    const record = this.allTimeStats.get(key);
+    return record ? record.data : null;
   }
 
-  /** Reset all statistics for a specific player */
-  async resetPlayerStats(playerName: string): Promise<boolean> {
+  /** Reset all statistics for a specific player in a specific game type */
+  async resetPlayerStats(gameType: string, playerName: string): Promise<boolean> {
     if (!this.db) return false;
 
+    const key = makeKey(gameType, playerName);
     try {
-      await this.db.delete(STATS_STORE, playerName);
+      await this.db.delete(STATS_STORE, key);
       runInAction(() => {
-        this.allTimeStats.delete(playerName);
+        this.allTimeStats.delete(key);
       });
       return true;
     } catch {
