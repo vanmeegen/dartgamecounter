@@ -15,6 +15,18 @@ export interface X01Config {
   legs: number;
 }
 
+export interface VisitRecord {
+  playerId: string;
+  visit: Visit;
+  scoreAfter: number;
+}
+
+export interface CompletedLeg {
+  legNumber: number;
+  winnerId: string | null;
+  visitHistory: VisitRecord[];
+}
+
 export interface X01State {
   players: PlayerScore[];
   currentPlayerIndex: number;
@@ -23,7 +35,9 @@ export interface X01State {
   /** Index of the player who started the current leg (for rotation) */
   legStartingPlayerIndex: number;
   /** History of all visits for undo functionality */
-  visitHistory: { playerId: string; visit: Visit; scoreAfter: number }[];
+  visitHistory: VisitRecord[];
+  /** History of all completed legs (preserved across nextLeg calls) */
+  completedLegs: CompletedLeg[];
   /** Match is finished (someone won enough legs) */
   finished: boolean;
   /** Current leg is finished (waiting for nextLeg call) */

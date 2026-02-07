@@ -6,6 +6,7 @@ import { PlayerSetupStore } from "./PlayerSetupStore";
 import { GameStore } from "./GameStore";
 import { UIStore } from "./UIStore";
 import { PresetStore } from "./PresetStore";
+import { StatisticsStore } from "./StatisticsStore";
 import { isGamePreset, type Preset } from "../types";
 
 /**
@@ -25,12 +26,14 @@ export class RootStore {
   gameStore: GameStore;
   uiStore: UIStore;
   presetStore: PresetStore;
+  statisticsStore: StatisticsStore;
 
   constructor() {
     this.playerSetupStore = new PlayerSetupStore();
     this.gameStore = new GameStore();
     this.uiStore = new UIStore();
     this.presetStore = new PresetStore();
+    this.statisticsStore = new StatisticsStore();
   }
 
   /**

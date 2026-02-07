@@ -33,6 +33,7 @@ export class X01Game implements Game {
       currentLeg: 1,
       legStartingPlayerIndex: 0,
       visitHistory: [],
+      completedLegs: [],
       finished: false,
       legFinished: false,
       winnerId: null,
@@ -60,6 +61,14 @@ export class X01Game implements Game {
    */
   nextLeg(): void {
     if (!this.state.legFinished || this.state.finished) return;
+
+    // Save current leg's visit history before clearing
+    const legWinner = this.state.players.find((ps) => ps.score === 0);
+    this.state.completedLegs.push({
+      legNumber: this.state.currentLeg,
+      winnerId: legWinner?.playerId ?? null,
+      visitHistory: [...this.state.visitHistory],
+    });
 
     // Increment leg counter
     this.state.currentLeg += 1;
@@ -302,5 +311,23 @@ export class X01Game implements Game {
 
     const pointsScored = this.config.variant - playerScore.score;
     return (pointsScored / totalDarts) * 3;
+  }
+
+  /**
+   * Get all completed legs including the current leg (if finished).
+   * Used for statistics calculation.
+   */
+  getAllCompletedLegs(): import("../types").CompletedLeg[] {
+    const legs = [...this.state.completedLegs];
+    // Include current leg if it's finished
+    if (this.state.legFinished) {
+      const legWinner = this.state.players.find((ps) => ps.score === 0);
+      legs.push({
+        legNumber: this.state.currentLeg,
+        winnerId: legWinner?.playerId ?? null,
+        visitHistory: [...this.state.visitHistory],
+      });
+    }
+    return legs;
   }
 }

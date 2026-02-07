@@ -23,10 +23,11 @@ import { CheckoutDisplay } from "./CheckoutDisplay";
 import { ButtonInput } from "../input/ButtonInput";
 import { DartboardInput } from "../dartboard";
 import { WinnerDialog } from "../dialogs/WinnerDialog";
-import type { Player } from "../../types";
+import { calculatePlayerStats } from "../../utils/statistics";
+import type { Player, PlayerStats, AllTimePlayerStats } from "../../types";
 
 export const GamePlayView = observer(function GamePlayView(): JSX.Element {
-  const { gameStore, uiStore } = useStores();
+  const { gameStore, uiStore, statisticsStore } = useStores();
   const game = gameStore.currentGame;
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
@@ -56,7 +57,26 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
     gameStore.nextLeg();
   };
 
+  const saveGameStats = (): void => {
+    if (!game) return;
+    const completedLegs = game.getAllCompletedLegs();
+    if (completedLegs.length === 0) return;
+
+    const playerIdToName = new Map(game.players.map((p) => [p.id, p.name]));
+    const playerNames = game.players.map((p) => p.name);
+    const matchWinner = game.getWinner();
+
+    statisticsStore.recordGameStats(
+      playerNames,
+      completedLegs,
+      playerIdToName,
+      game.config.variant,
+      matchWinner?.name ?? null
+    );
+  };
+
   const handleNewGame = (): void => {
+    saveGameStats();
     uiStore.closeWinnerDialog();
     gameStore.endGame();
     uiStore.goToPlayerSetup();
@@ -71,6 +91,36 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
     return null;
   };
 
+  // Compute current game statistics for all players
+  const computeCurrentGameStats = (): Map<string, PlayerStats> => {
+    const completedLegs = game.getAllCompletedLegs();
+    const statsMap = new Map<string, PlayerStats>();
+    for (const player of game.players) {
+      statsMap.set(
+        player.name,
+        calculatePlayerStats(player.id, completedLegs, game.config.variant)
+      );
+    }
+    return statsMap;
+  };
+
+  // Get all-time stats for all players
+  const getAllTimeStats = (): Map<string, AllTimePlayerStats | null> => {
+    const statsMap = new Map<string, AllTimePlayerStats | null>();
+    for (const player of game.players) {
+      statsMap.set(player.name, statisticsStore.getPlayerStats(player.name));
+    }
+    return statsMap;
+  };
+
+  const playerNames = game.players.map((p) => p.name);
+  const currentGameStats = uiStore.showWinnerDialog
+    ? computeCurrentGameStats()
+    : new Map<string, PlayerStats>();
+  const allTimeStats = uiStore.showWinnerDialog
+    ? getAllTimeStats()
+    : new Map<string, AllTimePlayerStats | null>();
+
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>): void => {
     setMenuAnchor(event.currentTarget);
   };
@@ -81,6 +131,7 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
 
   const handleLeaveGame = (): void => {
     handleMenuClose();
+    saveGameStats();
     gameStore.endGame();
     uiStore.goToPlayerSetup();
   };
@@ -161,7 +212,7 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
         )}
       </Box>
 
-      {/* Winner dialog */}
+      {/* Winner dialog with statistics */}
       <WinnerDialog
         open={uiStore.showWinnerDialog}
         winner={game.isFinished() ? game.getWinner() : getLegWinner()}
@@ -169,6 +220,9 @@ export const GamePlayView = observer(function GamePlayView(): JSX.Element {
         currentLeg={game.state.currentLeg}
         onNextLeg={handleNextLeg}
         onNewGame={handleNewGame}
+        playerNames={playerNames}
+        currentGameStats={currentGameStats}
+        allTimeStats={allTimeStats}
       />
     </Box>
   );

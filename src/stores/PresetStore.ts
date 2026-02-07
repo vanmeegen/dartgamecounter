@@ -7,9 +7,10 @@ import { openDB, type IDBPDatabase } from "idb";
 import type { PlayerPreset, GamePreset, Preset, X01Config } from "../types";
 
 const DB_NAME = "dartgamecounter";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const PRESET_STORE = "presets";
 const PLAYERS_STORE = "rememberedPlayers";
+const STATS_STORE = "playerStatistics";
 
 export class PresetStore {
   presets: Preset[] = [];
@@ -32,6 +33,11 @@ export class PresetStore {
           if (oldVersion < 2) {
             if (!db.objectStoreNames.contains(PLAYERS_STORE)) {
               db.createObjectStore(PLAYERS_STORE, { keyPath: "name" });
+            }
+          }
+          if (oldVersion < 3) {
+            if (!db.objectStoreNames.contains(STATS_STORE)) {
+              db.createObjectStore(STATS_STORE, { keyPath: "playerName" });
             }
           }
         },
