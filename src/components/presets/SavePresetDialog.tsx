@@ -78,7 +78,7 @@ export function SavePresetDialog({ open, onClose }: SavePresetDialogProps): JSX.
                 disabled={isSaving}
               />
             }
-            label="Include game settings (variant, out rule)"
+            label="Include game settings"
           />
         </DialogContent>
         <DialogActions>

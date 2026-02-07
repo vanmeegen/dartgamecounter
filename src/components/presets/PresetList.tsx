@@ -55,7 +55,10 @@ export const PresetList = observer(function PresetList(): JSX.Element {
     const playerText = `${playerCount} player${playerCount !== 1 ? "s" : ""}`;
 
     if (isGamePreset(preset)) {
-      return `${playerText} - ${preset.gameConfig.variant} ${preset.gameConfig.outRule} out`;
+      const config = preset.gameConfig;
+      const gameName = preset.gameType?.toUpperCase() ?? "Game";
+      const details = config.variant ? `${config.variant} ${config.outRule ?? ""} out` : gameName;
+      return `${playerText} - ${details}`;
     }
     return playerText;
   };

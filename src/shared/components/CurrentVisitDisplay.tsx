@@ -1,5 +1,6 @@
 /**
  * CurrentVisitDisplay - shows the 3 darts in current visit
+ * Shared across all dart games that use visit-based scoring.
  */
 
 import type { JSX } from "react";

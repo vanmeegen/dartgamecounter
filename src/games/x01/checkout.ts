@@ -1,9 +1,11 @@
 /**
  * Checkout calculator - calculates best finish combinations
+ * X01-specific utility.
  */
 
-import type { Dart, CheckoutSuggestion, OutRule } from "../types";
-import { formatDart } from "../types/dart.types";
+import type { Dart } from "../../types";
+import { formatDart } from "../../types/dart.types";
+import type { CheckoutSuggestion, OutRule } from "./types";
 
 // All possible single dart values
 const SINGLES: Dart[] = [];

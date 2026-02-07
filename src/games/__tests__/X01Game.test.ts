@@ -1,6 +1,7 @@
 import { describe, expect, test, beforeEach } from "bun:test";
-import { X01Game } from "../X01Game";
-import type { Player, X01Config } from "../../types";
+import { X01Game } from "../x01/X01Game";
+import type { Player } from "../../types";
+import type { X01Config } from "../x01/types";
 
 describe("X01Game", () => {
   const players: Player[] = [

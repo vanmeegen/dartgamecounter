@@ -8,6 +8,7 @@ import { UIStore } from "./UIStore";
 import { PresetStore } from "./PresetStore";
 import { StatisticsStore } from "./StatisticsStore";
 import { isGamePreset, type Preset } from "../types";
+import { gameRegistry } from "../games/registry";
 
 /**
  * Fisher-Yates shuffle algorithm for randomizing arrays
@@ -79,11 +80,16 @@ export class RootStore {
     });
 
     if (isGamePreset(preset)) {
-      // Full game preset - configure and start game
-      this.gameStore.setVariant(preset.gameConfig.variant);
-      this.gameStore.setOutRule(preset.gameConfig.outRule);
-      this.gameStore.setLegs(preset.gameConfig.legs);
-      this.startNewGame();
+      // Full game preset - select game type, configure and start
+      const gameType = preset.gameType;
+      if (gameRegistry.has(gameType)) {
+        this.gameStore.selectGame(gameType);
+        this.gameStore.updateConfig(preset.gameConfig);
+        this.startNewGame();
+      } else {
+        // Unknown game type - just go to config
+        this.uiStore.goToGameConfig();
+      }
     } else {
       // Player-only preset - go to game config
       this.uiStore.goToGameConfig();
@@ -100,12 +106,21 @@ export class RootStore {
   }
 
   /**
-   * Save current setup as a full game preset
+   * Save current setup as a full game preset (game type + config)
    */
   async saveCurrentAsGamePreset(name: string): Promise<boolean> {
     const playerNames = this.playerSetupStore.players.map((p) => p.name);
-    const gameConfig = this.gameStore.config;
-    const preset = await this.presetStore.saveGamePreset(name, playerNames, gameConfig);
+    const gameType = this.gameStore.selectedGameId;
+    const gameConfig = this.gameStore.gameConfig;
+
+    if (!gameType || !gameConfig) return false;
+
+    const preset = await this.presetStore.saveGamePreset(
+      name,
+      playerNames,
+      gameType,
+      gameConfig as Record<string, unknown>
+    );
     return preset !== null;
   }
 }
