@@ -44,6 +44,26 @@ export const theme = createTheme({
           textTransform: "none",
           borderRadius: 8,
         },
+        outlined: {
+          "&:active": {
+            backgroundColor: "rgba(255, 255, 255, 0.25)",
+            borderColor: "rgba(255, 255, 255, 0.5)",
+          },
+        },
+        contained: {
+          "&:active": {
+            filter: "brightness(1.4)",
+          },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          "&:active": {
+            backgroundColor: "rgba(255, 255, 255, 0.25)",
+          },
+        },
       },
     },
     MuiPaper: {

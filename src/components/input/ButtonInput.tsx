@@ -1,5 +1,10 @@
 /**
- * ButtonInput - number grid (1-20, 25, Bull) with modifiers (S, D, T, M)
+ * ButtonInput - number grid (1-20, 25, Bull) with modifiers (D, T) and Miss/Undo
+ *
+ * Layout:
+ * - Top row: D, T, Undo (single is implicit when no modifier active)
+ * - Middle: 4x5 number grid (1-20)
+ * - Bottom row: 25/Bull and Miss (sharing the row)
  */
 
 import { useState, type JSX } from "react";
@@ -13,6 +18,15 @@ interface ButtonInputProps {
   onThrow: (segment: number, multiplier: Multiplier) => void;
   onUndo: () => void;
 }
+
+/** Shared sx for modifier/action buttons in the top row */
+const modifierButtonSx = {
+  flex: 1,
+  minWidth: 0,
+  py: 1,
+  fontSize: "clamp(1rem, 4vw, 1.5rem)",
+  fontWeight: 700,
+} as const;
 
 export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element {
   const [modifier, setModifier] = useState<Multiplier>(1);
@@ -37,6 +51,11 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
     setModifier(1);
   };
 
+  const toggleModifier = (mod: Multiplier): void => {
+    // Toggle: if already active, go back to single; otherwise activate
+    setModifier(modifier === mod ? 1 : mod);
+  };
+
   const numbers = [
     [1, 2, 3, 4, 5],
     [6, 7, 8, 9, 10],
@@ -44,53 +63,37 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
     [16, 17, 18, 19, 20],
   ];
 
-  const getModifierColor = (mod: Multiplier): "primary" | "secondary" | "inherit" => {
-    if (modifier === mod) return "primary";
-    return "inherit";
-  };
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: "2px", height: "100%" }}>
-      {/* Modifier buttons */}
-      <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-        <Button
-          variant={modifier === 1 ? "contained" : "outlined"}
-          color={getModifierColor(1)}
-          onClick={() => setModifier(1)}
-          size="small"
-          sx={{ minWidth: 50, py: 0.5 }}
-        >
-          S
-        </Button>
+      {/* Modifier row: D, T, Undo */}
+      <Box sx={{ display: "flex", gap: "2px" }}>
         <Button
           variant={modifier === 2 ? "contained" : "outlined"}
-          color={getModifierColor(2)}
-          onClick={() => setModifier(2)}
-          size="small"
-          sx={{ minWidth: 50, py: 0.5 }}
+          color={modifier === 2 ? "secondary" : "inherit"}
+          onClick={() => toggleModifier(2)}
+          sx={modifierButtonSx}
         >
-          D
+          Double
         </Button>
         <Button
           variant={modifier === 3 ? "contained" : "outlined"}
-          color={getModifierColor(3)}
-          onClick={() => setModifier(3)}
-          size="small"
-          sx={{ minWidth: 50, py: 0.5 }}
+          color={modifier === 3 ? "secondary" : "inherit"}
+          onClick={() => toggleModifier(3)}
+          sx={modifierButtonSx}
         >
-          T
+          Triple
         </Button>
-        <Button
-          variant="outlined"
-          color="error"
-          onClick={handleMiss}
-          size="small"
-          sx={{ minWidth: 50, py: 0.5 }}
+        <IconButton
+          onClick={onUndo}
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
         >
-          M
-        </Button>
-        <IconButton onClick={onUndo} size="small">
-          <UndoIcon fontSize="small" />
+          <UndoIcon sx={{ fontSize: "clamp(1rem, 4vw, 1.5rem)" }} />
         </IconButton>
       </Box>
 
@@ -119,7 +122,7 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
           </Box>
         ))}
 
-        {/* Bottom row: 25 and Bull */}
+        {/* Bottom row: 25/Bull and Miss */}
         <Box sx={{ display: "flex", gap: "2px", flex: 1 }}>
           <Button
             variant="outlined"
@@ -136,6 +139,22 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
             }}
           >
             {modifier >= 2 ? "Bull" : "25"}
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={handleMiss}
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              fontSize: "clamp(1.5rem, 10vw, 7vh)",
+              fontWeight: 700,
+              p: 0,
+              lineHeight: 1,
+              minHeight: 0,
+            }}
+          >
+            M
           </Button>
         </Box>
       </Box>
