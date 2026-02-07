@@ -2,4 +2,4 @@
  * Theme exports
  */
 
-export { theme } from "./theme";
+export { darkTheme, lightTheme, theme } from "./theme";
