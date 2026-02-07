@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /**
  * Tests for StatisticsStore with mocked IndexedDB.
  * These tests cover the DB-dependent code paths.
@@ -20,7 +19,17 @@ interface MockHandlers {
   delete: (storeName: string, key: string) => Promise<void>;
 }
 
-function createMockDB() {
+interface MockDB {
+  mock: {
+    getAll: (...args: Parameters<MockHandlers["getAll"]>) => Promise<unknown[]>;
+    put: (...args: Parameters<MockHandlers["put"]>) => Promise<string>;
+    delete: (...args: Parameters<MockHandlers["delete"]>) => Promise<void>;
+  };
+  handlers: MockHandlers;
+  stores: Record<string, Map<string, unknown>>;
+}
+
+function createMockDB(): MockDB {
   const stores: Record<string, Map<string, unknown>> = {
     presets: new Map(),
     rememberedPlayers: new Map(),
@@ -28,30 +37,36 @@ function createMockDB() {
   };
 
   const handlers: MockHandlers = {
-    getAll(storeName: string) {
+    getAll(storeName: string): Promise<unknown[]> {
       return Promise.resolve(Array.from(stores[storeName]?.values() ?? []));
     },
-    put(storeName: string, value: MockValue) {
+    put(storeName: string, value: MockValue): Promise<string> {
       const key = value.id ?? value.name ?? value.key ?? "";
       stores[storeName]?.set(key, value);
       return Promise.resolve(key);
     },
-    delete(storeName: string, key: string) {
+    delete(storeName: string, key: string): Promise<void> {
       stores[storeName]?.delete(key);
       return Promise.resolve();
     },
   };
 
   const mock = {
-    getAll: (...args: Parameters<MockHandlers["getAll"]>) => handlers.getAll(...args),
-    put: (...args: Parameters<MockHandlers["put"]>) => handlers.put(...args),
-    delete: (...args: Parameters<MockHandlers["delete"]>) => handlers.delete(...args),
+    getAll: (...args: Parameters<MockHandlers["getAll"]>): Promise<unknown[]> =>
+      handlers.getAll(...args),
+    put: (...args: Parameters<MockHandlers["put"]>): Promise<string> => handlers.put(...args),
+    delete: (...args: Parameters<MockHandlers["delete"]>): Promise<void> =>
+      handlers.delete(...args),
   };
 
   return { mock, handlers, stores };
 }
 
-function createStoreWithMockDB() {
+function createStoreWithMockDB(): {
+  store: StatisticsStore;
+  handlers: MockHandlers;
+  stores: Record<string, Map<string, unknown>>;
+} {
   const store = new StatisticsStore();
   const { mock, handlers, stores } = createMockDB();
   (store as unknown as { db: unknown }).db = mock;
@@ -206,7 +221,7 @@ describe("StatisticsStore - with mock DB", () => {
       const completedLegs: CompletedLeg[] = [{ legNumber: 1, winnerId: "p1", visitHistory }];
       const playerIdToName = new Map([["p1", "Alice"]]);
 
-      handlers.put = () => Promise.reject(new Error("DB write error"));
+      handlers.put = (): Promise<string> => Promise.reject(new Error("DB write error"));
 
       // Should not throw
       await store.recordGameStats("x01", ["Alice"], completedLegs, playerIdToName, 301, null);
@@ -229,7 +244,7 @@ describe("StatisticsStore - with mock DB", () => {
     });
 
     test("handles db delete error gracefully", async () => {
-      handlers.delete = () => Promise.reject(new Error("DB error"));
+      handlers.delete = (): Promise<void> => Promise.reject(new Error("DB error"));
       const result = await store.resetPlayerStats("x01", "Alice");
       expect(result).toBe(false);
     });

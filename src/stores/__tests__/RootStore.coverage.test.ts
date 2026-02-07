@@ -3,10 +3,15 @@
  */
 
 import { describe, expect, test, beforeEach, afterEach } from "bun:test";
+import type { ComponentType } from "react";
 import { RootStore } from "../RootStore";
 import { gameRegistry } from "../../games/registry";
 import { X01Game } from "../../games/x01/X01Game";
 import type { X01Config } from "../../games/x01/types";
+import type { GameConfigComponentProps, GamePlayComponentProps } from "../../games/types";
+
+const StubConfig = (() => null) as ComponentType<GameConfigComponentProps<X01Config>>;
+const StubPlay = (() => null) as ComponentType<GamePlayComponentProps>;
 
 describe("RootStore - additional coverage", () => {
   let rootStore: RootStore;
@@ -19,11 +24,9 @@ describe("RootStore - additional coverage", () => {
       minPlayers: 1,
       maxPlayers: 8,
       defaultConfig: { variant: 501, outRule: "double", legs: 1 },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ConfigComponent: (() => null) as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      PlayComponent: (() => null) as any,
-      createGame: (players, config) => new X01Game(players, config as X01Config),
+      ConfigComponent: StubConfig,
+      PlayComponent: StubPlay,
+      createGame: (players, config) => new X01Game(players, config),
     });
     rootStore = new RootStore();
   });

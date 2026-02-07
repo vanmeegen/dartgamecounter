@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/no-non-null-assertion */
 /**
  * Tests for PresetStore with mocked IndexedDB.
  * These tests cover the DB-dependent code paths by injecting a mock db object.
@@ -19,7 +18,17 @@ interface MockHandlers {
   delete: (storeName: string, key: string) => Promise<void>;
 }
 
-function createMockDB() {
+interface MockDB {
+  mock: {
+    getAll: (...args: Parameters<MockHandlers["getAll"]>) => Promise<unknown[]>;
+    put: (...args: Parameters<MockHandlers["put"]>) => Promise<string>;
+    delete: (...args: Parameters<MockHandlers["delete"]>) => Promise<void>;
+  };
+  handlers: MockHandlers;
+  stores: Record<string, Map<string, unknown>>;
+}
+
+function createMockDB(): MockDB {
   const stores: Record<string, Map<string, unknown>> = {
     presets: new Map(),
     rememberedPlayers: new Map(),
@@ -27,30 +36,35 @@ function createMockDB() {
   };
 
   const handlers: MockHandlers = {
-    getAll(storeName: string) {
+    getAll(storeName: string): Promise<unknown[]> {
       return Promise.resolve(Array.from(stores[storeName]?.values() ?? []));
     },
-    put(storeName: string, value: MockValue) {
+    put(storeName: string, value: MockValue): Promise<string> {
       const key = value.id ?? value.name ?? value.key ?? "";
       stores[storeName]?.set(key, value);
       return Promise.resolve(key);
     },
-    delete(storeName: string, key: string) {
+    delete(storeName: string, key: string): Promise<void> {
       stores[storeName]?.delete(key);
       return Promise.resolve();
     },
   };
 
   const mock = {
-    getAll: (...args: Parameters<MockHandlers["getAll"]>) => handlers.getAll(...args),
-    put: (...args: Parameters<MockHandlers["put"]>) => handlers.put(...args),
-    delete: (...args: Parameters<MockHandlers["delete"]>) => handlers.delete(...args),
+    getAll: (...args: Parameters<MockHandlers["getAll"]>): Promise<unknown[]> =>
+      handlers.getAll(...args),
+    put: (...args: Parameters<MockHandlers["put"]>): Promise<string> => handlers.put(...args),
+    delete: (...args: Parameters<MockHandlers["delete"]>): Promise<void> =>
+      handlers.delete(...args),
   };
 
   return { mock, handlers, stores };
 }
 
-function injectMockDB(store: PresetStore) {
+function injectMockDB(store: PresetStore): {
+  handlers: MockHandlers;
+  stores: Record<string, Map<string, unknown>>;
+} {
   const { mock, handlers, stores } = createMockDB();
   (store as unknown as { db: unknown }).db = mock;
   return { handlers, stores };
@@ -82,7 +96,7 @@ describe("PresetStore - with mock DB", () => {
     });
 
     test("handles db error gracefully", async () => {
-      handlers.put = () => Promise.reject(new Error("DB error"));
+      handlers.put = (): Promise<string> => Promise.reject(new Error("DB error"));
       const result = await store.savePlayerPreset("Test", ["Alice"]);
       expect(result).toBeNull();
     });
@@ -106,7 +120,7 @@ describe("PresetStore - with mock DB", () => {
     });
 
     test("handles db error gracefully", async () => {
-      handlers.put = () => Promise.reject(new Error("DB error"));
+      handlers.put = (): Promise<string> => Promise.reject(new Error("DB error"));
       const result = await store.saveGamePreset("Test", ["Alice"], "x01", {});
       expect(result).toBeNull();
     });
@@ -117,13 +131,14 @@ describe("PresetStore - with mock DB", () => {
       const preset = await store.savePlayerPreset("To Delete", ["Alice"]);
       expect(store.presets).toHaveLength(1);
 
-      const result = await store.deletePreset(preset!.id);
+      const presetId = preset?.id ?? "";
+      const result = await store.deletePreset(presetId);
       expect(result).toBe(true);
       expect(store.presets).toHaveLength(0);
     });
 
     test("handles db error gracefully", async () => {
-      handlers.delete = () => Promise.reject(new Error("DB error"));
+      handlers.delete = (): Promise<void> => Promise.reject(new Error("DB error"));
       const result = await store.deletePreset("some-id");
       expect(result).toBe(false);
     });
@@ -160,7 +175,7 @@ describe("PresetStore - with mock DB", () => {
     });
 
     test("handles db error gracefully", async () => {
-      handlers.put = () => Promise.reject(new Error("DB error"));
+      handlers.put = (): Promise<string> => Promise.reject(new Error("DB error"));
       const result = await store.rememberPlayer("Alice");
       expect(result).toBe(false);
     });
@@ -203,7 +218,7 @@ describe("PresetStore - with mock DB", () => {
 
     test("handles db error gracefully", async () => {
       await store.rememberPlayer("Alice");
-      handlers.delete = () => Promise.reject(new Error("DB error"));
+      handlers.delete = (): Promise<void> => Promise.reject(new Error("DB error"));
       const result = await store.updateRememberedPlayer("Alice", "Alicia");
       expect(result).toBe(false);
     });
@@ -220,7 +235,7 @@ describe("PresetStore - with mock DB", () => {
     });
 
     test("handles db error gracefully", async () => {
-      handlers.delete = () => Promise.reject(new Error("DB error"));
+      handlers.delete = (): Promise<void> => Promise.reject(new Error("DB error"));
       const result = await store.forgetPlayer("Alice");
       expect(result).toBe(false);
     });

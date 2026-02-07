@@ -1,27 +1,31 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /**
  * Tests for GameRegistry - cover duplicate registration warning
  */
 
 import { describe, expect, test, beforeEach, afterEach } from "bun:test";
+import type { ComponentType } from "react";
 import { gameRegistry } from "../registry";
 import { X01Game } from "../x01/X01Game";
 import type { X01Config } from "../x01/types";
+import type { GameDefinition, GameConfigComponentProps, GamePlayComponentProps } from "../types";
+import type { Player } from "../../types";
 
-function makeX01Definition(overrides: Partial<{ name: string; description: string }> = {}) {
+const StubConfig = (() => null) as ComponentType<GameConfigComponentProps<X01Config>>;
+const StubPlay = (() => null) as ComponentType<GamePlayComponentProps>;
+
+function makeX01Definition(
+  overrides: Partial<{ name: string; description: string }> = {}
+): GameDefinition<X01Config> {
   return {
     id: "x01",
     name: overrides.name ?? "X01",
     description: overrides.description ?? "Classic countdown (301/501)",
     minPlayers: 1,
     maxPlayers: 8,
-    defaultConfig: { variant: 501, outRule: "double" as const, legs: 1 },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ConfigComponent: (() => null) as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    PlayComponent: (() => null) as any,
-    createGame: (players: { id: string; name: string }[], config: unknown) =>
-      new X01Game(players, config as X01Config),
+    defaultConfig: { variant: 501, outRule: "double", legs: 1 },
+    ConfigComponent: StubConfig,
+    PlayComponent: StubPlay,
+    createGame: (players: Player[], config: X01Config): X01Game => new X01Game(players, config),
   };
 }
 
