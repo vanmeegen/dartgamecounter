@@ -28,10 +28,8 @@ export const GameConfigView = observer(function GameConfigView(): JSX.Element {
 
   // Auto-select first game if none selected
   useEffect(() => {
-    if (!gameStore.selectedGameId && availableGames.length > 0) {
-      gameStore.selectGame(availableGames[0].id);
-    }
-  }, [gameStore, availableGames]);
+    gameStore.ensureGameSelected();
+  }, [gameStore]);
 
   const selectedDefinition = gameStore.currentGameDefinition;
 

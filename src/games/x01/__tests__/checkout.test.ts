@@ -46,6 +46,16 @@ describe("calculateCheckout", () => {
       expect(result80?.darts).toHaveLength(2);
     });
 
+    it("returns null for impossible 3-dart checkouts (bogey numbers)", () => {
+      // 169, 168, 166, 165, 163, 162 are impossible with double out
+      expect(calculateCheckout(169, 3, "double")).toBeNull();
+      expect(calculateCheckout(168, 3, "double")).toBeNull();
+      expect(calculateCheckout(166, 3, "double")).toBeNull();
+      expect(calculateCheckout(165, 3, "double")).toBeNull();
+      expect(calculateCheckout(163, 3, "double")).toBeNull();
+      expect(calculateCheckout(162, 3, "double")).toBeNull();
+    });
+
     it("finds 3-dart finishes", () => {
       // 170 = T20 T20 Bull (max checkout)
       const result170 = calculateCheckout(170, 3, "double");

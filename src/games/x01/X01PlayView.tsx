@@ -25,11 +25,14 @@ import { WinnerDialog } from "../../shared/components/dialogs";
 import { X01ScoreDisplay } from "./X01ScoreDisplay";
 import { X01CheckoutDisplay } from "./X01CheckoutDisplay";
 import { X01Statistics } from "./X01Statistics";
-import { calculateX01PlayerStats } from "./statistics";
+import {
+  getLegWinner as findLegWinner,
+  computeCurrentGameStats,
+  getAllTimeStats,
+} from "./X01PresentationModel";
 import type { GamePlayComponentProps } from "../types";
 import type { X01Game } from "./X01Game";
 import type { X01PlayerStats, X01AllTimePlayerStats } from "./types";
-import type { Player } from "../../types";
 
 export const X01PlayView = observer(function X01PlayView({
   game: baseGame,
@@ -95,46 +98,12 @@ export const X01PlayView = observer(function X01PlayView({
     onLeaveGame();
   };
 
-  // Find the leg winner (player whose score is 0)
-  const getLegWinner = (): Player | null => {
-    const winningPlayer = game.state.players.find((ps) => ps.score === 0);
-    if (winningPlayer) {
-      return game.players.find((p) => p.id === winningPlayer.playerId) ?? null;
-    }
-    return null;
-  };
-
-  // Compute current game statistics for all players
-  const computeCurrentGameStats = (): Map<string, X01PlayerStats> => {
-    const completedLegs = game.getAllCompletedLegs();
-    const statsMap = new Map<string, X01PlayerStats>();
-    for (const player of game.players) {
-      statsMap.set(
-        player.name,
-        calculateX01PlayerStats(player.id, completedLegs, game.config.variant)
-      );
-    }
-    return statsMap;
-  };
-
-  // Get all-time stats for all players
-  const getAllTimeStats = (): Map<string, X01AllTimePlayerStats | null> => {
-    const statsMap = new Map<string, X01AllTimePlayerStats | null>();
-    for (const player of game.players) {
-      statsMap.set(
-        player.name,
-        statisticsStore.getPlayerStats("x01", player.name) as X01AllTimePlayerStats | null
-      );
-    }
-    return statsMap;
-  };
-
   const playerNames = game.players.map((p) => p.name);
   const currentGameStats = uiStore.showWinnerDialog
-    ? computeCurrentGameStats()
+    ? computeCurrentGameStats(game)
     : new Map<string, X01PlayerStats>();
-  const allTimeStats = uiStore.showWinnerDialog
-    ? getAllTimeStats()
+  const allTimeStatsMap = uiStore.showWinnerDialog
+    ? getAllTimeStats(game, (gt, pn) => statisticsStore.getPlayerStats(gt, pn))
     : new Map<string, X01AllTimePlayerStats | null>();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>): void => {
@@ -224,7 +193,7 @@ export const X01PlayView = observer(function X01PlayView({
       {/* Winner dialog with X01-specific statistics */}
       <WinnerDialog
         open={uiStore.showWinnerDialog}
-        winner={game.isFinished() ? game.getWinner() : getLegWinner()}
+        winner={game.isFinished() ? game.getWinner() : findLegWinner(game)}
         isMatchWinner={game.isFinished()}
         currentLeg={game.state.currentLeg}
         onNextLeg={handleNextLeg}
@@ -234,7 +203,7 @@ export const X01PlayView = observer(function X01PlayView({
           <X01Statistics
             playerNames={playerNames}
             currentGameStats={currentGameStats}
-            allTimeStats={allTimeStats}
+            allTimeStats={allTimeStatsMap}
           />
         )}
       </WinnerDialog>
