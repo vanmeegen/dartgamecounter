@@ -212,6 +212,87 @@ describe("X01Game", () => {
     });
   });
 
+  describe("getPlayerAverage", () => {
+    test("returns 0 when no darts have been thrown", () => {
+      const game = new X01Game(players, config501Double);
+      expect(game.getPlayerAverage("p1")).toBe(0);
+    });
+
+    test("calculates average per 3 darts for completed visits", () => {
+      const game = new X01Game(players, config501Double);
+      // Player 1 throws T20, T20, T20 = 180
+      game.recordThrow({ segment: 20, multiplier: 3 });
+      game.recordThrow({ segment: 20, multiplier: 3 });
+      game.recordThrow({ segment: 20, multiplier: 3 });
+      // Average = 180 points / 3 darts * 3 = 180
+      expect(game.getPlayerAverage("p1")).toBe(180);
+    });
+
+    test("calculates average across multiple visits", () => {
+      const game = new X01Game(players, config501Double);
+      // P1 visit 1: 20 + 20 + 20 = 60
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      // P2 visit
+      game.recordThrow({ segment: 1, multiplier: 1 });
+      game.recordThrow({ segment: 1, multiplier: 1 });
+      game.recordThrow({ segment: 1, multiplier: 1 });
+      // P1 visit 2: T20 + T20 + T20 = 180
+      game.recordThrow({ segment: 20, multiplier: 3 });
+      game.recordThrow({ segment: 20, multiplier: 3 });
+      game.recordThrow({ segment: 20, multiplier: 3 });
+      // P1 total: 240 points in 6 darts -> average = 240/6*3 = 120
+      expect(game.getPlayerAverage("p1")).toBe(120);
+    });
+
+    test("includes current visit darts in average calculation", () => {
+      const game = new X01Game(players, config501Double);
+      // P1 throws 1 dart: T20 = 60
+      game.recordThrow({ segment: 20, multiplier: 3 });
+      // Average = 60 / 1 * 3 = 180
+      expect(game.getPlayerAverage("p1")).toBe(180);
+    });
+
+    test("includes busted visits in dart count but not points", () => {
+      const game = new X01Game(players, config501Double);
+      // P1 visit 1: 20 + 20 + 20 = 60 (score: 441)
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      // P2 visit
+      game.recordThrow({ segment: 1, multiplier: 1 });
+      game.recordThrow({ segment: 1, multiplier: 1 });
+      game.recordThrow({ segment: 1, multiplier: 1 });
+      // Set P1 score low to force bust
+      game.state.players[0].score = 2;
+      // P1 visit 2: T20 = 60 -> bust (score reverts to 2)
+      game.recordThrow({ segment: 20, multiplier: 3 });
+      // P1 scored: variant(501) - current score(2) = 499 points, in 4 darts (3 from visit 1 + 1 bust)
+      // average = 499/4*3 = 374.25
+      expect(game.getPlayerAverage("p1")).toBeCloseTo(374.25);
+    });
+
+    test("returns 0 for unknown player", () => {
+      const game = new X01Game(players, config501Double);
+      expect(game.getPlayerAverage("unknown")).toBe(0);
+    });
+
+    test("calculates separate averages per player", () => {
+      const game = new X01Game(players, config501Double);
+      // P1: T20, T20, T20 = 180
+      game.recordThrow({ segment: 20, multiplier: 3 });
+      game.recordThrow({ segment: 20, multiplier: 3 });
+      game.recordThrow({ segment: 20, multiplier: 3 });
+      // P2: 1, 1, 1 = 3
+      game.recordThrow({ segment: 1, multiplier: 1 });
+      game.recordThrow({ segment: 1, multiplier: 1 });
+      game.recordThrow({ segment: 1, multiplier: 1 });
+      expect(game.getPlayerAverage("p1")).toBe(180);
+      expect(game.getPlayerAverage("p2")).toBe(3);
+    });
+  });
+
   describe("multi-leg games", () => {
     const configBestOf3: X01Config = {
       variant: 301,

@@ -275,4 +275,32 @@ export class X01Game implements Game {
   getDartsRemaining(): number {
     return 3 - this.state.currentVisit.darts.length;
   }
+
+  /**
+   * Get the average score per visit (3 darts) for a player.
+   * Calculated as: (startingScore - currentScore) / dartsThrown * 3
+   */
+  getPlayerAverage(playerId: string): number {
+    const playerScore = this.state.players.find((ps) => ps.playerId === playerId);
+    if (!playerScore) return 0;
+
+    // Count darts from completed visits
+    let totalDarts = 0;
+    for (const record of this.state.visitHistory) {
+      if (record.playerId === playerId) {
+        totalDarts += record.visit.darts.length;
+      }
+    }
+
+    // Add current visit darts if this player is throwing
+    const currentPlayer = this.getCurrentPlayer();
+    if (currentPlayer.id === playerId) {
+      totalDarts += this.state.currentVisit.darts.length;
+    }
+
+    if (totalDarts === 0) return 0;
+
+    const pointsScored = this.config.variant - playerScore.score;
+    return (pointsScored / totalDarts) * 3;
+  }
 }

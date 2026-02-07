@@ -1,5 +1,6 @@
 /**
  * PlayerScoreDisplay - shows player scores (current player large, others small)
+ * with per-visit average in the lower-right corner of each badge
  */
 
 import type { JSX } from "react";
@@ -14,11 +15,17 @@ interface PlayerScoreDisplayProps {
   game: X01Game;
 }
 
+function formatAverage(avg: number): string {
+  if (avg === 0) return "-";
+  return avg % 1 === 0 ? avg.toFixed(0) : avg.toFixed(1);
+}
+
 export const PlayerScoreDisplay = observer(function PlayerScoreDisplay({
   game,
 }: PlayerScoreDisplayProps): JSX.Element {
   const currentPlayer = game.getCurrentPlayer();
   const currentScore = game.getPlayerScore(currentPlayer.id);
+  const currentAverage = game.getPlayerAverage(currentPlayer.id);
   const currentLegsWon = game.getPlayerLegsWon(currentPlayer.id);
   const otherPlayers = game.players.filter((p) => p.id !== currentPlayer.id);
   const showLegs = game.config.legs > 1;
@@ -44,8 +51,8 @@ export const PlayerScoreDisplay = observer(function PlayerScoreDisplay({
           py: 1,
           px: 2,
           mb: 0.5,
-          textAlign: "center",
           bgcolor: "primary.dark",
+          position: "relative",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
@@ -61,15 +68,30 @@ export const PlayerScoreDisplay = observer(function PlayerScoreDisplay({
             />
           )}
         </Box>
+        <Box sx={{ display: "flex", alignItems: "baseline", justifyContent: "center" }}>
+          <Typography
+            variant="h2"
+            sx={{
+              fontSize: { xs: "2.5rem", sm: "3rem" },
+              fontWeight: 700,
+              lineHeight: 1,
+            }}
+          >
+            {currentScore}
+          </Typography>
+        </Box>
+        {/* Average in lower-right corner */}
         <Typography
-          variant="h2"
           sx={{
-            fontSize: { xs: "2.5rem", sm: "3rem" },
-            fontWeight: 700,
+            position: "absolute",
+            bottom: 4,
+            right: 8,
+            fontSize: { xs: "0.85rem", sm: "1rem" },
+            color: "text.secondary",
             lineHeight: 1,
           }}
         >
-          {currentScore}
+          Avg {formatAverage(currentAverage)}
         </Typography>
       </Paper>
 
@@ -82,40 +104,69 @@ export const PlayerScoreDisplay = observer(function PlayerScoreDisplay({
             flexWrap: "wrap",
           }}
         >
-          {otherPlayers.map((player) => (
-            <Paper
-              key={player.id}
-              sx={{
-                flex: 1,
-                minWidth: 70,
-                py: 0.5,
-                px: 1,
-                textAlign: "center",
-                bgcolor: "background.paper",
-              }}
-            >
-              <Box
-                sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5 }}
+          {otherPlayers.map((player) => {
+            const playerAvg = game.getPlayerAverage(player.id);
+            return (
+              <Paper
+                key={player.id}
+                sx={{
+                  flex: 1,
+                  minWidth: 70,
+                  py: 0.5,
+                  px: 1,
+                  bgcolor: "background.paper",
+                  position: "relative",
+                }}
               >
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  noWrap
-                  sx={{ fontSize: "0.65rem" }}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 0.5,
+                  }}
                 >
-                  {player.name}
-                </Typography>
-                {showLegs && (
-                  <Typography variant="caption" color="secondary.main" sx={{ fontSize: "0.6rem" }}>
-                    ({game.getPlayerLegsWon(player.id)})
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    noWrap
+                    sx={{ fontSize: "0.65rem" }}
+                  >
+                    {player.name}
                   </Typography>
-                )}
-              </Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
-                {game.getPlayerScore(player.id)}
-              </Typography>
-            </Paper>
-          ))}
+                  {showLegs && (
+                    <Typography
+                      variant="caption"
+                      color="secondary.main"
+                      sx={{ fontSize: "0.6rem" }}
+                    >
+                      ({game.getPlayerLegsWon(player.id)})
+                    </Typography>
+                  )}
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+                    {game.getPlayerScore(player.id)}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: "0.65rem",
+                      color: "text.secondary",
+                      lineHeight: 1,
+                    }}
+                  >
+                    {formatAverage(playerAvg)}
+                  </Typography>
+                </Box>
+              </Paper>
+            );
+          })}
         </Box>
       )}
     </Box>
