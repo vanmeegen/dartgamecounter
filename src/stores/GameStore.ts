@@ -90,6 +90,17 @@ export class GameStore {
     return gameRegistry.get(this.selectedGameId) ?? null;
   }
 
+  /**
+   * Ensure a game is selected. If none, auto-select the first available game.
+   */
+  ensureGameSelected(): void {
+    if (this.selectedGameId) return;
+    const allGames = gameRegistry.getAll();
+    if (allGames.length > 0) {
+      this.selectGame(allGames[0].id);
+    }
+  }
+
   endGame(): void {
     this.currentGame = null;
   }

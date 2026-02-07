@@ -35,6 +35,13 @@ class GameRegistry {
   }
 
   /**
+   * Remove a game definition by id.
+   */
+  unregister(id: string): void {
+    this.games.delete(id);
+  }
+
+  /**
    * Check if a game type is registered.
    */
   has(id: string): boolean {

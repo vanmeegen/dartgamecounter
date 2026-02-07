@@ -13,6 +13,12 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import UndoIcon from "@mui/icons-material/Undo";
 import type { Multiplier } from "../../../types";
+import {
+  toggleModifier as toggleMod,
+  getBullThrow,
+  formatButtonLabel,
+  getBullButtonText,
+} from "./ButtonInputModel";
 
 interface ButtonInputProps {
   onThrow: (segment: number, multiplier: Multiplier) => void;
@@ -42,18 +48,13 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
   };
 
   const handleBull = (): void => {
-    // Bull (50) is always double, 25 is single bull
-    if (modifier === 1) {
-      onThrow(25, 1); // Single bull
-    } else {
-      onThrow(50, 1); // Double bull (Bull)
-    }
+    const bull = getBullThrow(modifier);
+    onThrow(bull.segment, bull.multiplier);
     setModifier(1);
   };
 
-  const toggleModifier = (mod: Multiplier): void => {
-    // Toggle: if already active, go back to single; otherwise activate
-    setModifier(modifier === mod ? 1 : mod);
+  const handleToggleModifier = (mod: Multiplier): void => {
+    setModifier(toggleMod(modifier, mod));
   };
 
   const numbers = [
@@ -70,7 +71,7 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
         <Button
           variant={modifier === 2 ? "contained" : "outlined"}
           color={modifier === 2 ? "secondary" : "inherit"}
-          onClick={() => toggleModifier(2)}
+          onClick={() => handleToggleModifier(2)}
           sx={modifierButtonSx}
         >
           Double
@@ -78,7 +79,7 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
         <Button
           variant={modifier === 3 ? "contained" : "outlined"}
           color={modifier === 3 ? "secondary" : "inherit"}
-          onClick={() => toggleModifier(3)}
+          onClick={() => handleToggleModifier(3)}
           sx={modifierButtonSx}
         >
           Triple
@@ -116,7 +117,7 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
                   minHeight: 0,
                 }}
               >
-                {modifier === 1 ? num : modifier === 2 ? `D${num}` : `T${num}`}
+                {formatButtonLabel(num, modifier)}
               </Button>
             ))}
           </Box>
@@ -138,7 +139,7 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
               bgcolor: modifier >= 2 ? "secondary.dark" : undefined,
             }}
           >
-            {modifier >= 2 ? "Bull" : "25"}
+            {getBullButtonText(modifier)}
           </Button>
           <Button
             variant="outlined"

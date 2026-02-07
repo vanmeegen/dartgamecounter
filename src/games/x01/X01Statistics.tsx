@@ -13,14 +13,11 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import type { X01PlayerStats, X01AllTimePlayerStats } from "./types";
+import { formatNumber } from "./X01PresentationModel";
 
 interface StatsEntry {
   label: string;
   values: string[];
-}
-
-function formatNumber(n: number, decimals = 0): string {
-  return n.toFixed(decimals).replace(".", ",");
 }
 
 function buildGameStatsRows(

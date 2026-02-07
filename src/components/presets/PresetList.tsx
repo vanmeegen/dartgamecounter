@@ -17,6 +17,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
 import { useStores } from "../../hooks/useStores";
 import { isGamePreset, type Preset } from "../../types";
+import { getPresetDescription } from "./presetFormatting";
 
 export const PresetList = observer(function PresetList(): JSX.Element {
   const rootStore = useStores();
@@ -48,19 +49,6 @@ export const PresetList = observer(function PresetList(): JSX.Element {
 
   const handleDeletePreset = async (preset: Preset): Promise<void> => {
     await presetStore.deletePreset(preset.id);
-  };
-
-  const getPresetDescription = (preset: Preset): string => {
-    const playerCount = preset.playerNames.length;
-    const playerText = `${playerCount} player${playerCount !== 1 ? "s" : ""}`;
-
-    if (isGamePreset(preset)) {
-      const config = preset.gameConfig;
-      const gameName = preset.gameType?.toUpperCase() ?? "Game";
-      const details = config.variant ? `${config.variant} ${config.outRule ?? ""} out` : gameName;
-      return `${playerText} - ${details}`;
-    }
-    return playerText;
   };
 
   return (

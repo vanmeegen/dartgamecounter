@@ -10,14 +10,10 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Chip from "@mui/material/Chip";
 import type { X01Game } from "./X01Game";
+import { formatAverage } from "./X01PresentationModel";
 
 interface X01ScoreDisplayProps {
   game: X01Game;
-}
-
-function formatAverage(avg: number): string {
-  if (avg === 0) return "-";
-  return avg % 1 === 0 ? avg.toFixed(0) : avg.toFixed(1);
 }
 
 export const X01ScoreDisplay = observer(function X01ScoreDisplay({
