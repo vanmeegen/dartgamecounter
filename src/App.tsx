@@ -12,6 +12,11 @@ import { GamePlayView } from "./components/game-play/GamePlayView";
 
 // Register all game modules
 import "./games/x01";
+import "./games/cricket";
+import "./games/around-the-clock";
+import "./games/around-the-world";
+import "./games/shanghai";
+import "./games/halve-it";
 
 const AppContent = observer(function AppContent(): JSX.Element {
   const uiStore = useUIStore();
