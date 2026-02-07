@@ -2,7 +2,20 @@
 
 @layer base {
   :root {
-    @apply text-[rgba(255,255,255,0.87)] bg-[#242424] font-sans;
+    @apply font-sans;
+    color-scheme: light dark;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      @apply text-[rgba(255,255,255,0.87)] bg-[#121212];
+    }
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      @apply text-[rgba(0,0,0,0.87)] bg-[#f5f5f5];
+    }
   }
 
   body {
