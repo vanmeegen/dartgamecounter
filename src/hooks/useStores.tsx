@@ -45,3 +45,7 @@ export function useUIStore(): RootStore["uiStore"] {
 export function usePresetStore(): RootStore["presetStore"] {
   return useStores().presetStore;
 }
+
+export function useStatisticsStore(): RootStore["statisticsStore"] {
+  return useStores().statisticsStore;
+}
