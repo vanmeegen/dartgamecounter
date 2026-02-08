@@ -106,7 +106,10 @@ export const HalveItPlayView = observer(function HalveItPlayView({
       </Box>
 
       <Box sx={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 1, px: 1, pb: 1 }}>
-        <CurrentVisitDisplay visit={game.currentVisit} />
+        <CurrentVisitDisplay
+          visit={game.currentVisit}
+          lastCompletedVisit={game.lastCompletedVisit}
+        />
       </Box>
 
       <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", p: 1, minHeight: 0 }}>

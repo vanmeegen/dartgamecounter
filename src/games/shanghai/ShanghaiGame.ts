@@ -33,6 +33,7 @@ export class ShanghaiGame implements Game {
   winnerId: string | null = null;
   currentLeg = 1;
   legStartingPlayerIndex = 0;
+  lastCompletedVisit: Visit | null = null;
 
   constructor(players: Player[], config: ShanghaiConfig) {
     this.players = players;
@@ -82,6 +83,7 @@ export class ShanghaiGame implements Game {
   recordThrow(dart: Dart): void {
     if (this.finished || this.legFinished) return;
     if (this.currentVisit.darts.length >= 3) return;
+    this.lastCompletedVisit = null;
 
     const ps = this.playerStates[this.currentPlayerIndex];
     const targetNum = this.getCurrentTargetNumber();
@@ -162,10 +164,16 @@ export class ShanghaiGame implements Game {
       }
     }
 
+    this.lastCompletedVisit = {
+      darts: [...this.currentVisit.darts],
+      total: this.currentVisit.total,
+      busted: this.currentVisit.busted,
+    };
     this.currentVisit = { darts: [], total: 0, busted: false };
   }
 
   undoLastThrow(): boolean {
+    this.lastCompletedVisit = null;
     if (this.dartSnapshots.length === 0) return false;
 
     const snapshot = this.dartSnapshots.pop();

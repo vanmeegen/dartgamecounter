@@ -177,7 +177,10 @@ export const X01PlayView = observer(function X01PlayView({
 
       {/* Current visit + Checkout in a row */}
       <Box sx={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 1, px: 1, pb: 1 }}>
-        <CurrentVisitDisplay visit={game.state.currentVisit} />
+        <CurrentVisitDisplay
+          visit={game.state.currentVisit}
+          lastCompletedVisit={game.lastCompletedVisit}
+        />
         <X01CheckoutDisplay suggestion={game.getCheckoutSuggestion()} />
       </Box>
 

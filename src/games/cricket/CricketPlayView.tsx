@@ -126,7 +126,10 @@ export const CricketPlayView = observer(function CricketPlayView({
           pb: 1,
         }}
       >
-        <CurrentVisitDisplay visit={game.currentVisit} />
+        <CurrentVisitDisplay
+          visit={game.currentVisit}
+          lastCompletedVisit={game.lastCompletedVisit}
+        />
       </Box>
 
       <Box
