@@ -48,7 +48,7 @@ export function App(): JSX.Element {
   useEffect(() => {
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
-      metaThemeColor.setAttribute("content", prefersDarkMode ? "#121212" : "#f5f5f5");
+      metaThemeColor.setAttribute("content", prefersDarkMode ? "#0a0e14" : "#f0f2f5");
     }
   }, [prefersDarkMode]);
 

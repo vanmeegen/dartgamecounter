@@ -136,7 +136,7 @@ export function ButtonInput({ onThrow, onUndo }: ButtonInputProps): JSX.Element 
               p: 0,
               lineHeight: 1,
               minHeight: 0,
-              bgcolor: modifier >= 2 ? "secondary.dark" : undefined,
+              bgcolor: modifier >= 2 ? "rgba(0,188,212,0.2)" : undefined,
             }}
           >
             {getBullButtonText(modifier)}
