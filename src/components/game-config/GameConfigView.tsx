@@ -10,8 +10,10 @@ import { observer } from "mobx-react-lite";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
@@ -37,10 +39,8 @@ export const GameConfigView = observer(function GameConfigView(): JSX.Element {
     uiStore.goToPlayerSetup();
   };
 
-  const handleGameTypeChange = (_: React.MouseEvent<HTMLElement>, value: string | null): void => {
-    if (value !== null) {
-      gameStore.selectGame(value);
-    }
+  const handleGameTypeChange = (event: { target: { value: string } }): void => {
+    gameStore.selectGame(event.target.value);
   };
 
   const handleStartGame = (): void => {
@@ -69,21 +69,21 @@ export const GameConfigView = observer(function GameConfigView(): JSX.Element {
       {/* Game type selector */}
       {availableGames.length > 1 && (
         <Box sx={{ mb: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Game Type
-          </Typography>
-          <ToggleButtonGroup
-            value={gameStore.selectedGameId}
-            exclusive
-            onChange={handleGameTypeChange}
-            fullWidth
-          >
-            {availableGames.map((game) => (
-              <ToggleButton key={game.id} value={game.id}>
-                {game.name}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
+          <FormControl fullWidth>
+            <InputLabel id="game-type-label">Game Type</InputLabel>
+            <Select
+              labelId="game-type-label"
+              value={gameStore.selectedGameId ?? ""}
+              label="Game Type"
+              onChange={handleGameTypeChange}
+            >
+              {availableGames.map((game) => (
+                <MenuItem key={game.id} value={game.id}>
+                  {game.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           {selectedDefinition && (
             <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
               {selectedDefinition.description}
