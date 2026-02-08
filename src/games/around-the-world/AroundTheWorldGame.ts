@@ -32,6 +32,7 @@ export class AroundTheWorldGame implements Game {
   winnerId: string | null = null;
   currentLeg = 1;
   legStartingPlayerIndex = 0;
+  lastCompletedVisit: Visit | null = null;
 
   constructor(players: Player[], config: AroundTheWorldConfig) {
     this.players = players;
@@ -85,6 +86,7 @@ export class AroundTheWorldGame implements Game {
   recordThrow(dart: Dart): void {
     if (this.finished || this.legFinished) return;
     if (this.currentVisit.darts.length >= 3) return;
+    this.lastCompletedVisit = null;
 
     const ps = this.playerStates[this.currentPlayerIndex];
 
@@ -137,10 +139,16 @@ export class AroundTheWorldGame implements Game {
     if (!this.finished && !this.legFinished) {
       this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
     }
+    this.lastCompletedVisit = {
+      darts: [...this.currentVisit.darts],
+      total: this.currentVisit.total,
+      busted: this.currentVisit.busted,
+    };
     this.currentVisit = { darts: [], total: 0, busted: false };
   }
 
   undoLastThrow(): boolean {
+    this.lastCompletedVisit = null;
     if (this.dartSnapshots.length === 0) return false;
 
     const snapshot = this.dartSnapshots.pop();

@@ -4,7 +4,7 @@
 
 import { makeAutoObservable } from "mobx";
 import type { Game } from "../types";
-import type { Dart, Player } from "../../types";
+import type { Dart, Player, Visit } from "../../types";
 import { getDartValue, isDouble } from "../../types/dart.types";
 import { getCheckoutSuggestion } from "./checkout";
 import type {
@@ -20,6 +20,7 @@ export class X01Game implements Game {
   readonly config: X01Config;
   readonly players: Player[];
   state: X01State;
+  lastCompletedVisit: Visit | null = null;
 
   constructor(players: Player[], config: X01Config) {
     this.players = players;
@@ -100,6 +101,7 @@ export class X01Game implements Game {
     if (this.state.finished) return;
     if (this.state.legFinished) return; // Wait for nextLeg() call
     if (this.state.currentVisit.darts.length >= 3) return;
+    this.lastCompletedVisit = null;
 
     const currentPlayerScore = this.getCurrentPlayerScore();
     const dartValue = getDartValue(dart);
@@ -168,11 +170,17 @@ export class X01Game implements Game {
       this.state.currentPlayerIndex = (this.state.currentPlayerIndex + 1) % this.players.length;
     }
 
-    // Reset current visit
+    // Save completed visit for display freeze, then reset
+    this.lastCompletedVisit = {
+      darts: [...this.state.currentVisit.darts],
+      total: this.state.currentVisit.total,
+      busted: this.state.currentVisit.busted,
+    };
     this.state.currentVisit = { darts: [], total: 0, busted: false };
   }
 
   undoLastThrow(): boolean {
+    this.lastCompletedVisit = null;
     // If current visit has darts, remove the last one
     if (this.state.currentVisit.darts.length > 0) {
       const lastDart = this.state.currentVisit.darts.pop();

@@ -3,7 +3,7 @@
  */
 
 import type { ComponentType } from "react";
-import type { Dart, Player } from "../types";
+import type { Dart, Player, Visit } from "../types";
 
 /**
  * Common interface for all dart game instances.
@@ -36,6 +36,9 @@ export interface Game {
 
   /** Get the score for a specific player */
   getPlayerScore(playerId: string): number;
+
+  /** Last completed visit, kept briefly for display freeze after visit ends */
+  lastCompletedVisit: Visit | null;
 
   /** Start the next leg/round after one finishes */
   nextLeg(): void;
