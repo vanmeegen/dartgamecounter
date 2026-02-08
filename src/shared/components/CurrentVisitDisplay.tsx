@@ -3,7 +3,7 @@
  * Shared across all dart games that use visit-based scoring.
  *
  * After a visit completes (3 darts / bust / checkout), the display
- * freezes for 1 second so the player can read the result before it
+ * freezes for 3 seconds so the player can read the result before it
  * clears for the next turn.
  */
 
@@ -29,9 +29,9 @@ export const CurrentVisitDisplay = observer(function CurrentVisitDisplay({
 
   useEffect(() => {
     if (lastCompletedVisit && lastCompletedVisit.darts.length > 0) {
-      // Visit just completed - freeze the display for 1s
+      // Visit just completed - freeze the display for 3s
       setFrozenVisit(lastCompletedVisit);
-      timerRef.current = setTimeout(() => setFrozenVisit(null), 1000);
+      timerRef.current = setTimeout(() => setFrozenVisit(null), 3000);
       return (): void => clearTimeout(timerRef.current);
     }
     // lastCompletedVisit cleared (new dart thrown or undo) - unfreeze immediately
@@ -55,9 +55,12 @@ export const CurrentVisitDisplay = observer(function CurrentVisitDisplay({
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: 0.5,
-        bgcolor: "secondary.dark",
-        borderRadius: 1,
+        gap: 0.75,
+        flex: 1,
+        background: "linear-gradient(135deg, rgba(0,188,212,0.15) 0%, rgba(0,230,118,0.10) 100%)",
+        border: "1px solid",
+        borderColor: "rgba(0,188,212,0.25)",
+        borderRadius: 1.5,
         px: 1,
         py: 0.5,
       }}
@@ -65,16 +68,21 @@ export const CurrentVisitDisplay = observer(function CurrentVisitDisplay({
       {slots.map((slot, index) => (
         <Paper
           key={index}
-          elevation={slot ? 2 : 0}
+          elevation={slot ? 3 : 0}
           sx={{
             width: { xs: 64, sm: 72 },
             height: { xs: 48, sm: 54 },
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            bgcolor: slot ? "background.paper" : "action.disabledBackground",
-            border: isBusted && slot ? "2px solid" : "none",
-            borderColor: "error.main",
+            bgcolor: slot ? "background.paper" : "rgba(255,255,255,0.04)",
+            border: isBusted && slot ? "2px solid" : "1px solid",
+            borderColor: isBusted && slot
+              ? "error.main"
+              : slot
+                ? "rgba(0,188,212,0.3)"
+                : "rgba(255,255,255,0.06)",
+            borderRadius: 1,
           }}
         >
           {slot ? (
@@ -89,23 +97,47 @@ export const CurrentVisitDisplay = observer(function CurrentVisitDisplay({
               {slot.display}
             </Typography>
           ) : (
-            <Typography color="text.disabled" sx={{ fontSize: "1.2rem" }}>
+            <Typography sx={{ fontSize: "1.2rem", color: "rgba(255,255,255,0.15)" }}>
               —
             </Typography>
           )}
         </Paper>
       ))}
 
-      {/* Total or bust indicator */}
-      {isBusted ? (
-        <Typography variant="body2" color="error.main" sx={{ fontWeight: 700, ml: 0.5 }}>
-          BUST
-        </Typography>
-      ) : displayTotal > 0 ? (
-        <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
-          ={displayTotal}
-        </Typography>
-      ) : null}
+      {/* Total or bust indicator - large, filling right space */}
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minWidth: 48,
+        }}
+      >
+        {isBusted ? (
+          <Typography
+            sx={{
+              fontWeight: 800,
+              fontSize: { xs: "1.4rem", sm: "1.6rem" },
+              color: "error.main",
+              letterSpacing: 1,
+            }}
+          >
+            BUST
+          </Typography>
+        ) : displayTotal > 0 ? (
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: { xs: "1.6rem", sm: "2rem" },
+              color: "primary.main",
+              lineHeight: 1,
+            }}
+          >
+            = {displayTotal}
+          </Typography>
+        ) : null}
+      </Box>
     </Box>
   );
 });

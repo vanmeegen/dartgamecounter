@@ -58,7 +58,8 @@ export function WinnerDialog({
           sx={{
             py: 2,
             px: 3,
-            bgcolor: "primary.dark",
+            background: "linear-gradient(135deg, rgba(0,230,118,0.18) 0%, rgba(0,188,212,0.12) 100%)",
+            border: "1px solid rgba(0,230,118,0.25)",
             borderRadius: 2,
             mb: 2,
           }}

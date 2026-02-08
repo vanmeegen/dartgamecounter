@@ -47,12 +47,16 @@ export const X01ScoreDisplay = observer(function X01ScoreDisplay({
           py: 1,
           px: 2,
           mb: 0.5,
-          bgcolor: "primary.dark",
+          background: "linear-gradient(135deg, rgba(0,230,118,0.18) 0%, rgba(0,188,212,0.12) 100%)",
+          border: "1px solid rgba(0,230,118,0.25)",
           position: "relative",
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
-          <Typography variant="caption" color="text.secondary">
+          <Typography
+            variant="caption"
+            sx={{ color: "primary.main", fontWeight: 500, letterSpacing: 0.5 }}
+          >
             {currentPlayer.name}
           </Typography>
           {showLegs && (
@@ -83,8 +87,9 @@ export const X01ScoreDisplay = observer(function X01ScoreDisplay({
             bottom: 4,
             right: 8,
             fontSize: { xs: "0.85rem", sm: "1rem" },
-            color: "text.secondary",
+            color: "secondary.main",
             lineHeight: 1,
+            fontWeight: 500,
           }}
         >
           Avg {formatAverage(currentAverage)}
