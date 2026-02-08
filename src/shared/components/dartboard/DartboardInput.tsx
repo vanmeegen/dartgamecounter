@@ -241,6 +241,7 @@ export function DartboardInput({ onThrow, onUndo }: DartboardInputProps): JSX.El
             height: "100%",
             maxWidth: "100%",
             maxHeight: "100%",
+            colorScheme: "only light",
           }}
         >
           {/* Background circle */}
