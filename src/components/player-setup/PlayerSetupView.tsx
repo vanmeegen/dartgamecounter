@@ -13,18 +13,23 @@ import Alert from "@mui/material/Alert";
 import IconButton from "@mui/material/IconButton";
 import InstallMobileIcon from "@mui/icons-material/InstallMobile";
 import PeopleIcon from "@mui/icons-material/People";
-import { usePlayerSetupStore, useUIStore } from "../../hooks/useStores";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import { usePlayerSetupStore, useUIStore, useStatisticsStore } from "../../hooks/useStores";
 import { AddPlayerForm } from "./AddPlayerForm";
 import { PlayerList } from "./PlayerList";
 import { NextButton } from "./NextButton";
 import { PresetList } from "../presets/PresetList";
 import { ManagePlayersDialog } from "../dialogs/ManagePlayersDialog";
+import { AllTimeStatisticsDialog } from "../statistics/AllTimeStatisticsDialog";
 
 export const PlayerSetupView = observer(function PlayerSetupView(): JSX.Element {
   const playerSetupStore = usePlayerSetupStore();
   const uiStore = useUIStore();
+  const statisticsStore = useStatisticsStore();
   const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
   const [showManagePlayers, setShowManagePlayers] = useState(false);
+  const [showStatistics, setShowStatistics] = useState(false);
+  const hasStats = statisticsStore.getPlayersWithStats("x01").length > 0;
 
   const handleAddPlayer = (name: string): void => {
     playerSetupStore.addPlayer(name);
@@ -78,6 +83,15 @@ export const PlayerSetupView = observer(function PlayerSetupView(): JSX.Element 
         <Typography variant="h4" component="h1">
           Players
         </Typography>
+        {hasStats && (
+          <IconButton
+            onClick={() => setShowStatistics(true)}
+            title="Statistiken anzeigen"
+            size="small"
+          >
+            <BarChartIcon />
+          </IconButton>
+        )}
         <IconButton
           onClick={() => setShowManagePlayers(true)}
           title="Manage remembered players"
@@ -110,6 +124,9 @@ export const PlayerSetupView = observer(function PlayerSetupView(): JSX.Element 
 
       {/* Manage remembered players dialog */}
       <ManagePlayersDialog open={showManagePlayers} onClose={() => setShowManagePlayers(false)} />
+
+      {/* All-time statistics dialog */}
+      <AllTimeStatisticsDialog open={showStatistics} onClose={() => setShowStatistics(false)} />
     </Container>
   );
 });

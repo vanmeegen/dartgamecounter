@@ -66,6 +66,7 @@ export function calculateX01PlayerStats(
     visits100Plus,
     visits140Plus,
     visits180,
+    totalDartsInWonLegs,
   };
 }
 

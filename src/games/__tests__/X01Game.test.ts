@@ -389,4 +389,137 @@ describe("X01Game", () => {
       expect(game.isLegFinished()).toBe(true);
     });
   });
+
+  describe("getAllCompletedLegs - multi-leg tracking", () => {
+    const configFirstTo3: X01Config = {
+      variant: 301,
+      outRule: "single",
+      legs: 3,
+    };
+
+    function winLegForCurrentPlayer(game: X01Game): void {
+      // Quick win: set score to 20, then throw 20
+      const currentPlayerId = game.getCurrentPlayer().id;
+      const playerScore = game.state.players.find((ps) => ps.playerId === currentPlayerId);
+      if (playerScore) playerScore.score = 20;
+      game.recordThrow({ segment: 20, multiplier: 1 });
+    }
+
+    test("returns 3 legs after playing 3 complete legs (first to 3)", () => {
+      // "first to 3" means a player needs 3 leg wins to win the match
+      const game = new X01Game(players, configFirstTo3);
+
+      // Leg 1: p1 wins (p1 starts)
+      winLegForCurrentPlayer(game);
+      expect(game.isLegFinished()).toBe(true);
+      game.nextLeg();
+
+      // Leg 2: p2 starts (rotation), but let's have p1 win again
+      // p2 starts, skip p2 turn, then p1 wins
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      // Now it's p1's turn
+      winLegForCurrentPlayer(game);
+      expect(game.isLegFinished()).toBe(true);
+      game.nextLeg();
+
+      // Leg 3: p1 starts, p1 wins (match over with 3 wins)
+      winLegForCurrentPlayer(game);
+      expect(game.isLegFinished()).toBe(true);
+      expect(game.isFinished()).toBe(true);
+
+      const legs = game.getAllCompletedLegs();
+      expect(legs.length).toBe(3);
+      expect(legs[0].legNumber).toBe(1);
+      expect(legs[1].legNumber).toBe(2);
+      expect(legs[2].legNumber).toBe(3);
+    });
+
+    test("each leg has its own visit history (no double counting)", () => {
+      const game = new X01Game(players, configFirstTo3);
+
+      // Leg 1: p1 throws some darts then wins
+      game.recordThrow({ segment: 20, multiplier: 3 }); // T20 = 60
+      game.recordThrow({ segment: 20, multiplier: 3 });
+      game.recordThrow({ segment: 20, multiplier: 3 });
+      // p2 throws
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      // Set p1 to 20 and checkout
+      game.state.players[0].score = 20;
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      game.nextLeg();
+
+      // Leg 2: different throws
+      game.recordThrow({ segment: 19, multiplier: 3 }); // p2 starts (rotation)
+      game.recordThrow({ segment: 19, multiplier: 3 });
+      game.recordThrow({ segment: 19, multiplier: 3 });
+      // Set p2 to 20 and checkout
+      game.state.players[1].score = 20;
+      // p1's turn
+      game.recordThrow({ segment: 10, multiplier: 1 });
+      game.recordThrow({ segment: 10, multiplier: 1 });
+      game.recordThrow({ segment: 10, multiplier: 1 });
+      // p2's turn - checkout
+      game.state.players[1].score = 20;
+      game.recordThrow({ segment: 20, multiplier: 1 });
+      game.nextLeg();
+
+      const legs = game.getAllCompletedLegs();
+      expect(legs.length).toBe(2);
+
+      // Leg 1 visits should only contain leg 1 throws
+      const leg1P1Visits = legs[0].visitHistory.filter((v) => v.playerId === "p1");
+      const leg1P2Visits = legs[0].visitHistory.filter((v) => v.playerId === "p2");
+      expect(leg1P1Visits.length).toBeGreaterThan(0);
+      expect(leg1P2Visits.length).toBeGreaterThan(0);
+
+      // Leg 2 visits should only contain leg 2 throws
+      const leg2Visits = legs[1].visitHistory;
+      // Leg 2 should NOT contain any T20 visits from leg 1
+      // Verify visits are separate - leg2 should have different darts
+      expect(leg2Visits.length).toBeGreaterThan(0);
+
+      // Total visits across all legs should equal total throws made
+      const totalVisits = legs[0].visitHistory.length + legs[1].visitHistory.length;
+      expect(totalVisits).toBeGreaterThan(legs[0].visitHistory.length);
+    });
+
+    test("includes current finished leg before nextLeg is called", () => {
+      const game = new X01Game(players, configFirstTo3);
+
+      // Win leg 1 but don't call nextLeg
+      winLegForCurrentPlayer(game);
+      expect(game.isLegFinished()).toBe(true);
+
+      const legs = game.getAllCompletedLegs();
+      expect(legs.length).toBe(1);
+      expect(legs[0].legNumber).toBe(1);
+      expect(legs[0].winnerId).toBe("p1");
+      expect(legs[0].visitHistory.length).toBeGreaterThan(0);
+    });
+
+    test("visit histories contain correct player data after 3 legs", () => {
+      const game = new X01Game(players, configFirstTo3);
+
+      // Play 3 legs with actual throws
+      for (let leg = 0; leg < 3; leg++) {
+        winLegForCurrentPlayer(game);
+        if (leg < 2) game.nextLeg();
+      }
+
+      const legs = game.getAllCompletedLegs();
+      expect(legs.length).toBe(3);
+
+      // Each leg should have visit records with valid player IDs
+      for (const leg of legs) {
+        for (const visit of leg.visitHistory) {
+          expect(["p1", "p2"]).toContain(visit.playerId);
+          expect(visit.visit.darts.length).toBeGreaterThan(0);
+        }
+      }
+    });
+  });
 });

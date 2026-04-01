@@ -249,4 +249,160 @@ describe("StatisticsStore - with mock DB", () => {
       expect(result).toBe(false);
     });
   });
+
+  describe("recordGameStats - multi-leg game accumulation", () => {
+    function make3DartVisit(
+      playerId: string,
+      s1: number,
+      m1: 1 | 2 | 3,
+      s2: number,
+      m2: 1 | 2 | 3,
+      s3: number,
+      m3: 1 | 2 | 3,
+      total: number,
+      scoreAfter: number,
+      busted = false
+    ): VisitRecord {
+      return makeVisitRecord(
+        playerId,
+        [
+          { segment: s1, multiplier: m1 },
+          { segment: s2, multiplier: m2 },
+          { segment: s3, multiplier: m3 },
+        ],
+        total,
+        scoreAfter,
+        busted
+      );
+    }
+
+    test("records correct all-time stats after a 3-leg game", async () => {
+      // Leg 1: Alice (p1) wins in 9 darts (3 visits), p1: 180 + 180 + 141 = 501
+      const leg1Fixed: CompletedLeg = {
+        legNumber: 1,
+        winnerId: "p1",
+        visitHistory: [
+          make3DartVisit("p1", 20, 3, 20, 3, 20, 3, 180, 321),
+          make3DartVisit("p2", 20, 1, 20, 1, 20, 1, 60, 441),
+          make3DartVisit("p1", 20, 3, 20, 3, 20, 3, 180, 141),
+          make3DartVisit("p2", 20, 1, 20, 1, 20, 1, 60, 381),
+          make3DartVisit("p1", 19, 3, 20, 3, 12, 2, 141, 0),
+        ],
+      };
+
+      // Leg 2: Bob (p2) wins in 15 darts (5 visits)
+      const leg2: CompletedLeg = {
+        legNumber: 2,
+        winnerId: "p2",
+        visitHistory: [
+          make3DartVisit("p2", 20, 3, 20, 1, 20, 1, 100, 401),
+          make3DartVisit("p1", 20, 1, 20, 1, 20, 1, 60, 441),
+          make3DartVisit("p2", 20, 3, 20, 1, 20, 1, 100, 301),
+          make3DartVisit("p1", 20, 1, 20, 1, 20, 1, 60, 381),
+          make3DartVisit("p2", 20, 3, 20, 1, 20, 1, 100, 201),
+          make3DartVisit("p1", 20, 1, 20, 1, 20, 1, 60, 321),
+          make3DartVisit("p2", 20, 3, 20, 1, 20, 1, 100, 101),
+          make3DartVisit("p1", 20, 1, 20, 1, 20, 1, 60, 261),
+          make3DartVisit("p2", 19, 3, 20, 1, 12, 2, 101, 0),
+        ],
+      };
+
+      // Leg 3: Alice (p1) wins in 12 darts (4 visits): 180 + 180 + 100 + 41 = 501
+      const leg3_12darts: CompletedLeg = {
+        legNumber: 3,
+        winnerId: "p1",
+        visitHistory: [
+          make3DartVisit("p1", 20, 3, 20, 3, 20, 3, 180, 321),
+          make3DartVisit("p2", 20, 1, 20, 1, 20, 1, 60, 441),
+          make3DartVisit("p1", 20, 3, 20, 3, 20, 3, 180, 141),
+          make3DartVisit("p2", 20, 1, 20, 1, 20, 1, 60, 381),
+          make3DartVisit("p1", 20, 3, 20, 1, 20, 1, 100, 41),
+          make3DartVisit("p2", 20, 1, 20, 1, 20, 1, 60, 321),
+          make3DartVisit("p1", 19, 1, 20, 1, 1, 2, 41, 0),
+        ],
+      };
+
+      const completedLegs = [leg1Fixed, leg2, leg3_12darts];
+      const playerIdToName = new Map([
+        ["p1", "Alice"],
+        ["p2", "Bob"],
+      ]);
+
+      await store.recordGameStats(
+        "x01",
+        ["Alice", "Bob"],
+        completedLegs,
+        playerIdToName,
+        501,
+        "Alice"
+      );
+
+      const aliceStats = store.getPlayerStats("x01", "Alice") as Record<string, unknown>;
+      expect(aliceStats).not.toBeNull();
+      expect(aliceStats.gamesPlayed).toBe(1);
+      expect(aliceStats.gamesWon).toBe(1);
+      expect(aliceStats.legsPlayed).toBe(3);
+      expect(aliceStats.legsWon).toBe(2);
+
+      // Alice: leg1 = 9 darts, leg2 = 12 darts (4 visits as loser), leg3 = 12 darts
+      // totalDarts = 9 + 12 + 12 = 33
+      expect(aliceStats.totalDarts).toBe(33);
+
+      // Alice won legs 1 and 3: totalDartsInWonLegs = 9 + 12 = 21
+      expect(aliceStats.totalDartsInWonLegs).toBe(21);
+      expect(aliceStats.wonLegCount).toBe(2);
+
+      // All-time average = (totalPointsScored / totalDarts) * 3
+      // Alice totalPointsScored: leg1=501(winner) + leg2=240(loser: 4*60) + leg3=501(winner) = 1242
+      expect(aliceStats.totalPointsScored).toBe(1242);
+      const aliceAverage =
+        ((aliceStats.totalPointsScored as number) / (aliceStats.totalDarts as number)) * 3;
+      expect(aliceAverage).toBeCloseTo((1242 / 33) * 3);
+      // Sanity: average should be reasonable (not > 180)
+      expect(aliceAverage).toBeLessThanOrEqual(180);
+      expect(aliceAverage).toBeGreaterThan(0);
+    });
+
+    test("totalDartsInWonLegs accumulates correctly across multiple games", async () => {
+      const leg1: CompletedLeg = {
+        legNumber: 1,
+        winnerId: "p1",
+        visitHistory: [
+          make3DartVisit("p1", 20, 3, 20, 3, 20, 3, 180, 321),
+          make3DartVisit("p1", 20, 3, 20, 3, 20, 3, 180, 141),
+          make3DartVisit("p1", 19, 3, 20, 3, 12, 2, 141, 0),
+        ],
+      };
+      // Game 1: Alice wins in 9 darts
+      const playerIdToName = new Map([["p1", "Alice"]]);
+      await store.recordGameStats("x01", ["Alice"], [leg1], playerIdToName, 501, "Alice");
+
+      let stats = store.getPlayerStats("x01", "Alice") as Record<string, unknown>;
+      expect(stats.totalDartsInWonLegs).toBe(9);
+      expect(stats.wonLegCount).toBe(1);
+
+      // Game 2: Alice wins in 15 darts
+      const leg2: CompletedLeg = {
+        legNumber: 1,
+        winnerId: "p1",
+        visitHistory: [
+          make3DartVisit("p1", 20, 3, 20, 1, 20, 1, 100, 401),
+          make3DartVisit("p1", 20, 3, 20, 1, 20, 1, 100, 301),
+          make3DartVisit("p1", 20, 3, 20, 1, 20, 1, 100, 201),
+          make3DartVisit("p1", 20, 3, 20, 1, 20, 1, 100, 101),
+          make3DartVisit("p1", 19, 3, 20, 1, 12, 2, 101, 0),
+        ],
+      };
+      await store.recordGameStats("x01", ["Alice"], [leg2], playerIdToName, 501, "Alice");
+
+      stats = store.getPlayerStats("x01", "Alice") as Record<string, unknown>;
+      // Should be 9 + 15 = 24, not lossy from floating point
+      expect(stats.totalDartsInWonLegs).toBe(24);
+      expect(stats.wonLegCount).toBe(2);
+
+      // Darts per leg should be 24 / 2 = 12
+      const dartsPerLeg = (stats.totalDartsInWonLegs as number) / (stats.wonLegCount as number);
+      expect(dartsPerLeg).toBe(12);
+    });
+  });
 });
