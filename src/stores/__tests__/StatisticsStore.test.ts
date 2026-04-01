@@ -115,4 +115,51 @@ describe("StatisticsStore", () => {
       expect(result).toBe(false);
     });
   });
+
+  describe("getPlayersWithStats", () => {
+    test("returns empty array when no stats exist", () => {
+      expect(store.getPlayersWithStats("x01")).toEqual([]);
+    });
+
+    test("returns player names for a specific game type", () => {
+      store.allTimeStats.set("x01:Alice", {
+        key: "x01:Alice",
+        gameType: "x01",
+        playerName: "Alice",
+        data: { gamesPlayed: 5 },
+      });
+      store.allTimeStats.set("x01:Bob", {
+        key: "x01:Bob",
+        gameType: "x01",
+        playerName: "Bob",
+        data: { gamesPlayed: 3 },
+      });
+
+      const players = store.getPlayersWithStats("x01");
+      expect(players).toContain("Alice");
+      expect(players).toContain("Bob");
+      expect(players.length).toBe(2);
+    });
+
+    test("only returns players for the requested game type", () => {
+      store.allTimeStats.set("x01:Alice", {
+        key: "x01:Alice",
+        gameType: "x01",
+        playerName: "Alice",
+        data: { gamesPlayed: 5 },
+      });
+      store.allTimeStats.set("cricket:Bob", {
+        key: "cricket:Bob",
+        gameType: "cricket",
+        playerName: "Bob",
+        data: { gamesPlayed: 2 },
+      });
+
+      const x01Players = store.getPlayersWithStats("x01");
+      expect(x01Players).toEqual(["Alice"]);
+
+      const cricketPlayers = store.getPlayersWithStats("cricket");
+      expect(cricketPlayers).toEqual(["Bob"]);
+    });
+  });
 });

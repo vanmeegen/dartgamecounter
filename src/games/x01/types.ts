@@ -68,6 +68,7 @@ export interface X01PlayerStats {
   visits100Plus: number;
   visits140Plus: number;
   visits180: number;
+  totalDartsInWonLegs: number;
 }
 
 /** X01-specific all-time player stats (persisted in IndexedDB) */

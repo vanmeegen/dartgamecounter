@@ -139,9 +139,7 @@ export class StatisticsStore {
         visits100Plus: existing.visits100Plus + gameStats.visits100Plus,
         visits140Plus: existing.visits140Plus + gameStats.visits140Plus,
         visits180: existing.visits180 + gameStats.visits180,
-        totalDartsInWonLegs:
-          existing.totalDartsInWonLegs +
-          (gameStats.dartsPerLeg !== null ? gameStats.dartsPerLeg * gameStats.legsWon : 0),
+        totalDartsInWonLegs: existing.totalDartsInWonLegs + gameStats.totalDartsInWonLegs,
         wonLegCount: existing.wonLegCount + gameStats.legsWon,
       };
 
@@ -168,6 +166,17 @@ export class StatisticsStore {
     const key = makeKey(gameType, playerName);
     const record = this.allTimeStats.get(key);
     return record ? record.data : null;
+  }
+
+  /** Get all player names that have stats for a specific game type */
+  getPlayersWithStats(gameType: string): string[] {
+    const players: string[] = [];
+    for (const [, record] of this.allTimeStats) {
+      if (record.gameType === gameType) {
+        players.push(record.playerName);
+      }
+    }
+    return players;
   }
 
   /** Reset all statistics for a specific player in a specific game type */
