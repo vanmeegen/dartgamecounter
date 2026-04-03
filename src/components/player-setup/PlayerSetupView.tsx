@@ -11,10 +11,15 @@ import Divider from "@mui/material/Divider";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import IconButton from "@mui/material/IconButton";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
 import InstallMobileIcon from "@mui/icons-material/InstallMobile";
 import PeopleIcon from "@mui/icons-material/People";
 import BarChartIcon from "@mui/icons-material/BarChart";
-import { usePlayerSetupStore, useUIStore, useStatisticsStore } from "../../hooks/useStores";
+import { usePlayerSetupStore, useUIStore } from "../../hooks/useStores";
 import { AddPlayerForm } from "./AddPlayerForm";
 import { PlayerList } from "./PlayerList";
 import { NextButton } from "./NextButton";
@@ -25,11 +30,9 @@ import { AllTimeStatisticsDialog } from "../statistics/AllTimeStatisticsDialog";
 export const PlayerSetupView = observer(function PlayerSetupView(): JSX.Element {
   const playerSetupStore = usePlayerSetupStore();
   const uiStore = useUIStore();
-  const statisticsStore = useStatisticsStore();
   const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
   const [showManagePlayers, setShowManagePlayers] = useState(false);
   const [showStatistics, setShowStatistics] = useState(false);
-  const hasStats = statisticsStore.getPlayersWithStats("x01").length > 0;
 
   const handleAddPlayer = (name: string): void => {
     playerSetupStore.addPlayer(name);
@@ -83,15 +86,6 @@ export const PlayerSetupView = observer(function PlayerSetupView(): JSX.Element 
         <Typography variant="h4" component="h1">
           Players
         </Typography>
-        {hasStats && (
-          <IconButton
-            onClick={() => setShowStatistics(true)}
-            title="Statistiken anzeigen"
-            size="small"
-          >
-            <BarChartIcon />
-          </IconButton>
-        )}
         <IconButton
           onClick={() => setShowManagePlayers(true)}
           title="Manage remembered players"
@@ -100,6 +94,18 @@ export const PlayerSetupView = observer(function PlayerSetupView(): JSX.Element 
           <PeopleIcon />
         </IconButton>
       </Box>
+
+      {/* Menu entries */}
+      <List disablePadding sx={{ mb: 1 }}>
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => setShowStatistics(true)}>
+            <ListItemIcon sx={{ minWidth: 40 }}>
+              <BarChartIcon />
+            </ListItemIcon>
+            <ListItemText primary="Statistiken" secondary="Gesamt-Statistik aller Spieler" />
+          </ListItemButton>
+        </ListItem>
+      </List>
 
       {/* Presets section */}
       <PresetList />
